@@ -13,6 +13,11 @@
     },
     {
       "src": "/(.*)",
+      "dest": "/$1",
+      "check": true
+    },
+    {
+      "src": "/(.*)",
       "dest": "server.js"
     }
   ]
