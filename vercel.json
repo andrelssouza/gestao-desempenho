@@ -12,9 +12,8 @@
       "dest": "server.js"
     },
     {
-      "src": "/(.*)",
-      "dest": "/$1",
-      "check": true
+      "src": "/gestao_desempenho_v3.html",
+      "dest": "server.js"
     },
     {
       "src": "/(.*)",
