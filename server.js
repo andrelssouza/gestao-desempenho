@@ -420,6 +420,10 @@ Responda em português, de forma profissional e estruturada.`;
     console.error('Erro:', error.message);
     res.status(500).json({ error: error.message });
   }
-});
+if (require.main === module) {
+  app.listen(PORT, () => {
+    console.log(`✅ Servidor rodando em http://localhost:${PORT}`);
+  });
+}
 
 module.exports = app;
