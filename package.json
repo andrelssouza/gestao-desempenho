@@ -1,0 +1,22 @@
+{
+  "name": "gestao-desempenho-api",
+  "version": "1.0.0",
+  "description": "Backend seguro para Gestão de Desempenho com autenticação",
+  "main": "server.js",
+  "scripts": {
+    "start": "node server.js",
+    "dev": "node server.js"
+  },
+  "keywords": ["rh", "desempenho", "pdi", "auth"],
+  "author": "",
+  "license": "MIT",
+  "dependencies": {
+    "express": "^4.18.2",
+    "cors": "^2.8.5",
+    "dotenv": "^16.0.3",
+    "node-fetch": "^2.6.11",
+    "jsonwebtoken": "^9.0.2",
+    "bcryptjs": "^2.4.3",
+    "nodemailer": "^6.9.7"
+  }
+}

@@ -1,0 +1,774 @@
+
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Gestão de Desempenho</title>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+    html, body {
+      width: 100%;
+      height: 100%;
+      overflow: hidden;
+      font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+    }
+    #root3 {
+      width: 100%;
+      height: 100%;
+      display: flex;
+      flex-direction: column;
+    }
+  </style>
+</head>
+<body>
+<div id="root3"></div>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/react/18.2.0/umd/react.production.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/react-dom/18.2.0/umd/react-dom.production.min.js"></script>
+<script src="https://unpkg.com/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+<script>
+const {useState}=React,cr=React.createElement;
+const {useMemo}=React;
+
+// Verificar autenticação
+const token = localStorage.getItem('token');
+const user = JSON.parse(localStorage.getItem('user') || 'null');
+const skipAuth = localStorage.getItem('skipAuth') === 'true';
+
+if (!token && !user && !skipAuth) {
+  window.location.href = 'login.html';
+}
+
+// Logout function
+window.logout = () => {
+  localStorage.removeItem('token');
+  localStorage.removeItem('user');
+  localStorage.removeItem('skipAuth');
+  window.location.href = 'login.html';
+};
+
+// Skip auth function (for development/testing)
+window.skipAuth = () => {
+  localStorage.setItem('skipAuth', 'true');
+  window.location.reload();
+};
+
+const MAT=["Iniciante","Básico","Intermediário","Avançado","Expert"];
+const MAT_C=["#E24B4A","#EF9F27","#378ADD","#1D9E75","#6d5ae6"];
+const SS=["Comunicação","Trabalho equipe","Liderança","Int. emocional","Proatividade","Res. conflitos"];
+const HS=["Excel/Dados","Gest. projetos","Conh. técnico","Ferramentas","Processos","Análise crítica"];
+const SC={pendente:"#BA7517","em andamento":"#185FA5",concluido:"#0F6E56"};
+const SB={pendente:"#FAEEDA","em andamento":"#E6F1FB",concluido:"#E1F5EE"};
+const NL=[["Enigma","Prof. sólido","Star"],["Dilema","Eficaz","Alto pot."],["Em risco","Aprendiz","Promissor"]];
+const NC_L=[["#FAEEDA","#E1F5EE","#534AB7"],["#FAECE7","#E6F1FB","#AFA9EC"],["#FCEBEB","#EAF3DE","#E1F5EE"]];
+const NT_L=[["#BA7517","#0F6E56","#fff"],["#993C1D","#185FA5","#3C3489"],["#A32D2D","#3B6D11","#0F6E56"]];
+const NC_D=[["#412402","#04342C","#26215C"],["#4A1B0C","#042C53","#26215C"],["#501313","#173404","#04342C"]];
+const NT_D=[["#FAC775","#9FE1CB","#CECBF6"],["#F5C4B3","#B5D4F4","#AFA9EC"],["#F7C1C1","#C0DD97","#9FE1CB"]];
+const colab0=[
+  {id:1,nome:"Ana Souza",cargo:"Analista de RH",area:"RH",avatar:"AS",softSkills:[7.5,5,5,7.5,10,5],hardSkills:[7.5,5,10,7.5,5,7.5],
+   metas:[{id:1,titulo:"Onboarding digital",okr:"Reduzir integração 30%",progresso:70,prazo:"2025-06-30"},{id:2,titulo:"Cert. People Analytics",okr:"Concluir até Q2",progresso:40,prazo:"2025-05-31"}],
+   feedbacks:[{id:1,tipo:"positivo",texto:"Excelente comunicação com novos colaboradores.",data:"2025-03-10",autor:"Carlos Lima"},{id:2,tipo:"desenvolvimento",texto:"Melhorar organização dos processos de triagem.",data:"2025-02-20",autor:"Carlos Lima"}],
+   pdi:[{id:1,competencia:"Liderança",acao:"Curso de liderança situacional",prazo:"2025-07-01",status:"em andamento"},{id:2,competencia:"Dados",acao:"Treinamento Power BI",prazo:"2025-06-01",status:"pendente"}],
+   historico:[{periodo:"Q4 2024",mediaGeral:7.0},{periodo:"Q1 2025",mediaGeral:7.8}],potencial:1,desempenho:1,
+   skillsHistory:[{date:"2024-01-01",softSkills:[2.5,2.5,2.5,2.5,2.5,2.5],hardSkills:[2.5,2.5,2.5,2.5,2.5,2.5]},{date:"2025-01-01",softSkills:[7.5,5,5,7.5,10,5],hardSkills:[7.5,5,10,7.5,5,7.5]}],
+   nineboxHistory:[{date:"2024-01-01",potencial:0,desempenho:0},{date:"2025-01-01",potencial:1,desempenho:1}]},
+  {id:2,nome:"Bruno Melo",cargo:"Dev Backend",area:"TI",avatar:"BM",softSkills:[5,7.5,2.5,5,10,5],hardSkills:[10,7.5,10,10,7.5,10],
+   metas:[{id:1,titulo:"Migrar API microsserviços",okr:"Performance +50%",progresso:55,prazo:"2025-08-31"},{id:2,titulo:"Reduzir bugs produção",okr:"0 incidentes/mês",progresso:80,prazo:"2025-12-31"}],
+   feedbacks:[{id:1,tipo:"positivo",texto:"Entrega consistente e código de alta qualidade.",data:"2025-03-15",autor:"Fernanda Torres"},{id:2,tipo:"desenvolvimento",texto:"Melhorar documentação técnica das APIs.",data:"2025-01-30",autor:"Fernanda Torres"}],
+   pdi:[{id:1,competencia:"Comunicação",acao:"Workshop de apresentação técnica",prazo:"2025-06-15",status:"pendente"},{id:2,competencia:"Liderança",acao:"Mentoria de estagiários",prazo:"2025-07-01",status:"em andamento"}],
+   historico:[{periodo:"Q4 2024",mediaGeral:8.0},{periodo:"Q1 2025",mediaGeral:8.8}],potencial:2,desempenho:1,
+   skillsHistory:[],nineboxHistory:[]},
+  {id:3,nome:"Carla Dias",cargo:"Gerente Comercial",area:"Vendas",avatar:"CD",softSkills:[10,10,10,7.5,10,10],hardSkills:[7.5,10,7.5,7.5,10,10],
+   metas:[{id:1,titulo:"Meta vendas Q2",okr:"R$2M novos contratos",progresso:90,prazo:"2025-06-30"},{id:2,titulo:"Playbook de vendas",okr:"10 processos doc.",progresso:30,prazo:"2025-07-31"}],
+   feedbacks:[{id:1,tipo:"positivo",texto:"Liderança excepcional da equipe comercial.",data:"2025-03-18",autor:"Ricardo Nunes"},{id:2,tipo:"positivo",texto:"Superou meta do trimestre em 15%.",data:"2025-02-28",autor:"Ricardo Nunes"}],
+   pdi:[{id:1,competencia:"Gestão projetos",acao:"Certificação PMP",prazo:"2025-10-01",status:"pendente"},{id:2,competencia:"Dados",acao:"Curso análise de funil",prazo:"2025-06-01",status:"em andamento"}],
+   historico:[{periodo:"Q4 2024",mediaGeral:9.5},{periodo:"Q1 2025",mediaGeral:10.3}],potencial:2,desempenho:2,
+   skillsHistory:[],nineboxHistory:[]}
+];
+const med=a=>a.reduce((x,y)=>x+y,0)/a.length;
+const avg=c=>((med(c.softSkills)+med(c.hardSkills))/2).toFixed(1);
+
+function RadarSingle({skills,labels,cor,fill,dark}){
+  const cx=100,cy=95,r=62,n=skills.length;
+  const pt=(vals)=>vals.map((_,i)=>{const a=(Math.PI*2*i/n)-Math.PI/2,v=(vals[i]/10)*r;return[cx+v*Math.cos(a),cy+v*Math.sin(a)];});
+  const poly=p=>p.map(x=>x.join(",")).join(" ");
+  const grid=f=>Array.from({length:n},(_,i)=>{const a=(Math.PI*2*i/n)-Math.PI/2;return[cx+r*f*Math.cos(a),cy+r*f*Math.sin(a)];});
+  const lp=Array.from({length:n},(_,i)=>{const a=(Math.PI*2*i/n)-Math.PI/2;return[cx+(r+18)*Math.cos(a),cy+(r+18)*Math.sin(a)];});
+  const gc=dark?"rgba(255,255,255,0.12)":"#ddd",tc=dark?"#aaa":"#888";
+  const pts=pt(skills);
+  return cr("svg",{viewBox:"0 0 220 210",style:{width:"100%",maxWidth:"280px",margin:"0 auto",display:"block"}},
+    ...[0.25,0.5,0.75,1].map(f=>cr("polygon",{key:f,points:poly(grid(f)),fill:"none",stroke:gc,strokeWidth:"0.8"})),
+    ...Array.from({length:n},(_,i)=>{const a=(Math.PI*2*i/n)-Math.PI/2;return cr("line",{key:i,x1:cx,y1:cy,x2:cx+r*Math.cos(a),y2:cy+r*Math.sin(a),stroke:gc,strokeWidth:"0.8"});}),
+    cr("polygon",{points:poly(pts),fill:fill,stroke:cor,strokeWidth:2}),
+    ...pts.map((p,i)=>cr("circle",{key:"c"+i,cx:p[0],cy:p[1],r:3,fill:cor})),
+    ...lp.map((p,i)=>cr("text",{key:"l"+i,x:p[0],y:p[1],textAnchor:"middle",dominantBaseline:"middle",fontSize:8.5,fill:tc},labels[i])),
+    ...pts.map((p,i)=>{
+      const ox=p[0]>cx+5?7:p[0]<cx-5?-7:0,oy=p[1]>cy+5?9:p[1]<cy-5?-9:0;
+      return cr("text",{key:"v"+i,x:p[0]+ox,y:p[1]+oy,textAnchor:"middle",fontSize:7.5,fontWeight:"bold",fill:cor},MAT[Math.min(4, Math.floor(skills[i]/2))].slice(0,4));
+    })
+  );
+}
+
+function App(){
+  const[dark,setDark]=useState(false);
+  const[cols,setCols]=useState(colab0);
+  const[selId,setSelId]=useState(1);
+  const[aba,setAba]=useState("visao");
+  const[pg,setPg]=useState("colaboradores");
+  const[editSk,setEditSk]=useState(false);
+  const[tSoft,setTS]=useState(null);
+  const[tHard,setTH]=useState(null);
+  const[showFb,setShowFb]=useState(false);
+  const[nFb,setNFb]=useState({tipo:"positivo",texto:"",autor:""});
+  const[showMeta,setShowMeta]=useState(false);
+  const[nMeta,setNMeta]=useState({titulo:"",okr:"",progresso:0,prazo:""});
+  const[editingInfo,setEditingInfo]=useState(false);
+  const[tempCargo,setTempCargo]=useState("");
+  const[tempArea,setTempArea]=useState("");
+  const[showPdi,setShowPdi]=useState(false);
+  const[nPdi,setNPdi]=useState({competencia:"",acao:"",prazo:"",status:"pendente"});
+  const[aiLoad,setAiLoad]=useState(false);
+  const[aiSug,setAiSug]=useState(null);
+  const[showNC,setShowNC]=useState(false);
+  const[novoC,setNovoC]=useState({nome:"",cargo:"",area:""});
+  const[confirmDel,setConfirmDel]=useState(null);
+  const[aiAnalysis,setAiAnalysis]=useState(null);
+  const[showAnalysis,setShowAnalysis]=useState(false);
+  const[aiAnalysisLoad,setAiAnalysisLoad]=useState(false);
+  const[buscaColaborador,setBuscaColaborador]=useState("");
+  const[setorSelecionado,setSetorSelecionado]=useState("");
+  const[showHistory,setShowHistory]=useState(false);
+  const[historyCol,setHistoryCol]=useState(null);
+
+  const T=useMemo(()=>({
+    bg:dark?"#111827":"#ffffff",bgSec:dark?"#1f2937":"#f3f4f6",bgTer:dark?"#374151":"#e5e7eb",
+    text:dark?"#f9fafb":"#111827",textSec:dark?"#9ca3af":"#6b7280",
+    border:dark?"rgba(255,255,255,0.1)":"rgba(0,0,0,0.1)",card:dark?"#1f2937":"#ffffff",
+  }),[dark]);
+  const inp=useMemo(()=>({padding:"7px 10px",border:`0.5px solid rgba(0,0,0,0.1)`,borderRadius:6,fontSize:13,background:dark?"#374151":"#fff",color:dark?"#f9fafb":"#111827",width:"100%",boxSizing:"border-box"}),[dark]);
+  const Card=({children,style={}})=>cr("div",{style:{background:T.card,border:`0.5px solid ${T.border}`,borderRadius:10,padding:"12px 14px",...style}},children);
+  const Badge=({children,color,bg})=>cr("span",{style:{fontSize:11,padding:"2px 8px",borderRadius:20,background:bg,color,fontWeight:500}},children);
+  const bs=(bg,color,ex={})=>({padding:"7px 14px",background:bg,color,border:"none",borderRadius:6,fontSize:13,fontWeight:500,cursor:"pointer",...ex});
+
+  const col=cols.find(c=>c.id===selId)||(cols.length?cols[0]:null);
+
+  const salvarSk=()=>{setCols(p=>p.map(c=>c.id===selId?{...c,softSkills:tSoft,hardSkills:tHard,historico:[...c.historico,{periodo:"Q2 2025",mediaGeral:parseFloat(((med(tSoft)+med(tHard))/2).toFixed(1))}],
+   skillsHistory:[...c.skillsHistory,{date:new Date().toISOString().slice(0,10),softSkills:tSoft,hardSkills:tHard}]}:c));setEditSk(false);};
+  const addFb=()=>{if(!nFb.texto)return;setCols(p=>p.map(c=>c.id===selId?{...c,feedbacks:[{...nFb,id:Date.now(),data:new Date().toISOString().slice(0,10)},...c.feedbacks]}:c));setShowFb(false);setNFb({tipo:"positivo",texto:"",autor:""});};
+  const addMeta=()=>{if(!nMeta.titulo)return;setCols(p=>p.map(c=>c.id===selId?{...c,metas:[...c.metas,{...nMeta,id:Date.now(),progresso:parseInt(nMeta.progresso)||0}]}:c));setShowMeta(false);setNMeta({titulo:"",okr:"",progresso:0,prazo:""});};
+  const addPdi=()=>{if(!nPdi.acao)return;setCols(p=>p.map(c=>c.id===selId?{...c,pdi:[...c.pdi,{...nPdi,id:Date.now()}]}:c));setShowPdi(false);setNPdi({competencia:"",acao:"",prazo:"",status:"pendente"});};
+  const addCol=()=>{
+    if(!novoC.nome||!novoC.cargo)return;
+    const av=novoC.nome.split(" ").slice(0,2).map(x=>x[0]).join("").toUpperCase();
+    const n={id:Date.now(),nome:novoC.nome,cargo:novoC.cargo,area:novoC.area||"Geral",avatar:av,softSkills:[1,1,1,1,1,1],hardSkills:[1,1,1,1,1,1],metas:[],feedbacks:[],pdi:[],historico:[],potencial:0,desempenho:0};
+    setCols(p=>[...p,n]);setSelId(n.id);setNovoC({nome:"",cargo:"",area:""});setShowNC(false);setPg("colaboradores");setAba("visao");
+  };
+  const excluir=(id)=>{const r=cols.filter(c=>c.id!==id);setCols(r);if(r.length)setSelId(r[0].id);setConfirmDel(null);};
+  const updNB=(id,pot,des)=>setCols(p=>p.map(c=>c.id===id?{...c,potencial:pot,desempenho:des,nineboxHistory:[...c.nineboxHistory,{date:new Date().toISOString().slice(0,10),potencial:pot,desempenho:des}]}:c));
+  const addSug=s=>{const p={id:Date.now(),competencia:s.competencia,acao:s.acao,prazo:s.prazo||"2025-12-31",status:"pendente"};setCols(prev=>prev.map(c=>c.id===selId?{...c,pdi:[...c.pdi,p]}:c));};
+  const gerarIA=async()=>{
+    setAiLoad(true);setAiSug(null);
+    try{
+      const softSkillsStr=SS.map((s,i)=>`${s}: ${MAT[col.softSkills[i]]}`).join(", ");
+      const hardSkillsStr=HS.map((s,i)=>`${s}: ${MAT[col.hardSkills[i]]}`).join(", ");
+      const res=await fetch("http://localhost:3001/api/gerar-pdi",{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({nome:col.nome,cargo:col.cargo,area:col.area,softSkills:softSkillsStr,hardSkills:hardSkillsStr,media:avg(col)})});
+      if(!res.ok){throw new Error(`Servidor não está rodando. Execute: npm start\nErro: ${res.status}`);}
+      const data=await res.json();
+      setAiSug(data.sugestoes||[]);
+    }catch(e){
+      console.error("Erro IA:",e);
+      alert("❌ Erro ao conectar ao servidor.\n\n📋 Certifique-se de:\n1. Execute: npm install\n2. Execute: npm start\n\n"+e.message);
+      setAiSug([]);
+    }
+    setAiLoad(false);
+  };
+  const analisarFuncionario=async()=>{
+    setAiAnalysisLoad(true);setAiAnalysis(null);
+    try{
+      const nineBoxPot=["Baixo","Médio","Alto"][col.potencial]||"Não definido";
+      const nineBoxDes=["Baixo","Médio","Alto"][col.desempenho]||"Não definido";
+      const funcionarioData={nome:col.nome,cargo:col.cargo,area:col.area,mediaGeral:avg(col),softSkillLabels:SS,softSkillsEval:SS.map((s,i)=>({nivel:MAT[col.softSkills[i]],valor:col.softSkills[i]})),softSkillsMedia:med(col.softSkills).toFixed(1),hardSkillLabels:HS,hardSkillsEval:HS.map((s,i)=>({nivel:MAT[col.hardSkills[i]],valor:col.hardSkills[i]})),hardSkillsMedia:med(col.hardSkills).toFixed(1),metas:col.metas,feedbacks:col.feedbacks,pdi:col.pdi,historico:col.historico,potencialLabel:nineBoxPot,desempenhoLabel:nineBoxDes};
+      const res=await fetch("http://localhost:3001/api/analisar-funcionario",{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({funcionario:funcionarioData})});
+      if(!res.ok){throw new Error(`Servidor: ${res.status}`);}
+      const data=await res.json();
+      setAiAnalysis(data.analise||"");
+    }catch(e){
+      console.error("Erro Análise:",e);
+      alert("❌ Erro ao conectar ao servidor.\n\n"+e.message);
+      setAiAnalysis(null);
+    }
+    setAiAnalysisLoad(false);
+  };
+  const exportar=()=>{
+    const linhas=cols.map(c=>`${c.nome} | ${c.cargo} | ${c.area} | Média: ${avg(c)} | Metas: ${c.metas.length} | PDI: ${c.pdi.length} | Nine Box: ${NL[2-c.potencial]?.[c.desempenho]||"-"}`);
+    const txt=`RELATÓRIO DE DESEMPENHO\n${"=".repeat(50)}\nGerado em: ${new Date().toLocaleDateString("pt-BR")}\n\n${linhas.join("\n")}\n\nTotal: ${cols.length} | Média equipe: ${(cols.reduce((a,c)=>a+parseFloat(avg(c)),0)/cols.length||0).toFixed(1)}`;
+    const b=new Blob([txt],{type:"text/plain"});const u=URL.createObjectURL(b);const a=document.createElement("a");a.href=u;a.download="relatorio.txt";a.click();
+  };
+
+  const exportarExcel=()=>{
+    const dados=[["Colaborador","Área","Cargo","Média Geral","Soft Skills","Hard Skills","Metas","PDIs","Nine Box"],...cols.map(c=>{const soft=med(c.softSkills).toFixed(1),hard=med(c.hardSkills).toFixed(1),nblabel=NL[2-c.potencial]?.[c.desempenho]||"-";return[c.nome,c.area,c.cargo,avg(c),soft,hard,c.metas.length,c.pdi.length,nblabel];})];
+    const ws=XLSX.utils.aoa_to_sheet(dados);
+    ws["!cols"]=[{wch:20},{wch:15},{wch:20},{wch:13},{wch:13},{wch:13},{wch:8},{wch:8},{wch:15}];
+    const wb=XLSX.utils.book_new();
+    XLSX.utils.book_append_sheet(wb,ws,"Relatório");
+    XLSX.writeFile(wb,`Relatorio_Desempenho_${new Date().toISOString().slice(0,10)}.xlsx`);
+  };
+
+  const exportarHistoricoPDF=(colaborador)=>{
+    const {jsPDF}=window.jspdf;
+    const doc=new jsPDF({unit:'mm',format:'a4'});
+    doc.setFont("helvetica","normal");
+    const pageWidth=210; // A4 width in mm
+    const pageHeight=297; // A4 height in mm
+    const marginLeft=20;
+    const marginRight=20;
+    const marginTop=25;
+    const marginBottom=25;
+    const contentWidth=pageWidth-marginLeft-marginRight;
+    let y=marginTop;
+
+    // Título
+    doc.setFontSize(18);
+    doc.setFont("helvetica","bold");
+    doc.text(`Histórico de Desempenho - ${colaborador.nome}`,marginLeft,y);
+    y+=15;
+
+    // Informações Gerais
+    doc.setFontSize(14);
+    doc.setFont("helvetica","bold");
+    doc.text("Informações Gerais",marginLeft,y);
+    y+=10;
+    doc.setFontSize(11);
+    doc.setFont("helvetica","normal");
+    doc.text(`Cargo: ${colaborador.cargo}`,marginLeft,y);
+    y+=7;
+    doc.text(`Área: ${colaborador.area}`,marginLeft,y);
+    y+=7;
+    doc.text(`Média atual: ${avg(colaborador)}/10.0`,marginLeft,y);
+    y+=15;
+
+    // PDI
+    if(colaborador.pdi.length>0){
+      doc.setFontSize(14);
+      doc.setFont("helvetica","bold");
+      doc.text("PDI",marginLeft,y);
+      y+=10;
+      doc.setFontSize(11);
+      doc.setFont("helvetica","normal");
+      colaborador.pdi.forEach(p=>{
+        if(y>pageHeight-marginBottom-10){doc.addPage();y=marginTop;}
+        doc.text(`${p.acao} (${p.competencia}) - ${p.status} - Prazo: ${p.prazo}`,marginLeft,y,{maxWidth:contentWidth});
+        y+=7;
+      });
+      y+=8;
+    }
+
+    // Feedbacks
+    if(colaborador.feedbacks.length>0){
+      doc.setFontSize(14);
+      doc.setFont("helvetica","bold");
+      doc.text("Feedbacks",marginLeft,y);
+      y+=10;
+      doc.setFontSize(11);
+      doc.setFont("helvetica","normal");
+      colaborador.feedbacks.forEach(f=>{
+        if(y>pageHeight-marginBottom-15){doc.addPage();y=marginTop;}
+        doc.text(`${f.data} - ${f.tipo.toUpperCase()} por ${f.autor}: ${f.texto}`,marginLeft,y,{maxWidth:contentWidth});
+        y+=10;
+      });
+      y+=8;
+    }
+
+    // Skills History
+    if(colaborador.skillsHistory.length>0){
+      doc.setFontSize(14);
+      doc.setFont("helvetica","bold");
+      doc.text("Progressão de Skills",marginLeft,y);
+      y+=10;
+      doc.setFontSize(11);
+      doc.setFont("helvetica","normal");
+      colaborador.skillsHistory.slice().reverse().forEach((sh,i,arr)=>{
+        if(y>pageHeight-marginBottom-40){doc.addPage();y=marginTop;}
+        doc.text(sh.date,marginLeft,y);
+        y+=7;
+        const prev=arr[i+1];
+        SS.forEach((s,j)=>{
+          const prevLevel=prev?MAT[prev.softSkills[j]]:"N/A";
+          const currLevel=MAT[sh.softSkills[j]];
+          const change=prevLevel!==currLevel?` (de ${prevLevel} para ${currLevel})`:"";
+          doc.text(`Soft - ${s}: ${currLevel}${change}`,marginLeft+5,y);
+          y+=5;
+        });
+        HS.forEach((s,j)=>{
+          const prevLevel=prev?MAT[prev.hardSkills[j]]:"N/A";
+          const currLevel=MAT[sh.hardSkills[j]];
+          const change=prevLevel!==currLevel?` (de ${prevLevel} para ${currLevel})`:"";
+          doc.text(`Hard - ${s}: ${currLevel}${change}`,marginLeft+5,y);
+          y+=5;
+        });
+        y+=5;
+      });
+      y+=8;
+    }
+
+    // Ninebox History
+    if(colaborador.nineboxHistory.length>0){
+      doc.setFontSize(14);
+      doc.setFont("helvetica","bold");
+      doc.text("Progressão Nine Box",marginLeft,y);
+      y+=10;
+      doc.setFontSize(11);
+      doc.setFont("helvetica","normal");
+      colaborador.nineboxHistory.slice().reverse().forEach((nh,i,arr)=>{
+        if(y>pageHeight-marginBottom-10){doc.addPage();y=marginTop;}
+        const prev=arr[i+1];
+        const currLabel=NL[2-nh.potencial]?.[nh.desempenho]||"Baixo";
+        const prevLabel=prev?NL[2-prev.potencial]?.[prev.desempenho]||"Baixo":"N/A";
+        const change=prevLabel!==currLabel?` (de ${prevLabel} para ${currLabel})`:"";
+        doc.text(`${nh.date}: ${currLabel}${change}`,marginLeft,y);
+        y+=7;
+      });
+    }
+
+    // Rodapé
+    const totalPages=doc.internal.getNumberOfPages();
+    for(let i=1;i<=totalPages;i++){
+      doc.setPage(i);
+      doc.setFontSize(8);
+      doc.setFont("helvetica","normal");
+      doc.text(`Gerado em ${new Date().toLocaleDateString("pt-BR")} - Página ${i} de ${totalPages}`,marginLeft,pageHeight-marginBottom);
+    }
+
+    doc.save(`Historico_${colaborador.nome.replace(/\s+/g,"_")}_${new Date().toISOString().slice(0,10)}.pdf`);
+  };
+
+  const navItems=[{id:"colaboradores",l:"Colaboradores"},{id:"ninebox",l:"Nine Box"},{id:"relatorio",l:"Relatório"}];
+  const abas=[{id:"visao",l:"Visão Geral"},{id:"skills",l:"Skills"},{id:"metas",l:"Metas"},{id:"feedback",l:"Feedbacks"},{id:"pdi",l:"PDI"},{id:"historico",l:"Histórico"}];
+
+  return cr("div",{style:{fontFamily:"'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif",width:"100%",height:"100%",padding:"12px 8px",background:T.bg,display:"flex",flexDirection:"column",overflow:"auto",transition:"background .3s"}},
+    // Modal exclusão
+    confirmDel&&cr("div",{style:{position:"fixed",inset:0,background:"rgba(0,0,0,0.55)",zIndex:200,display:"flex",alignItems:"center",justifyContent:"center"}},
+      cr("div",{style:{background:T.card,border:`0.5px solid ${T.border}`,borderRadius:12,padding:24,maxWidth:340,width:"90%",margin:"0 16px"}},
+        cr("p",{style:{margin:"0 0 6px",fontWeight:500,fontSize:16,color:T.text}},"Excluir colaborador?"),
+        cr("p",{style:{margin:"0 0 20px",fontSize:13,color:T.textSec}},"Isso removerá permanentemente ",cr("strong",{style:{color:T.text}},confirmDel.nome)," e todos os seus dados."),
+        cr("div",{style:{display:"flex",gap:10,justifyContent:"flex-end"}},
+          cr("button",{style:bs(T.bgSec,T.textSec),onClick:()=>setConfirmDel(null)},"Cancelar"),
+          cr("button",{style:bs("#E24B4A","#fff"),onClick:()=>excluir(confirmDel.id)},"Confirmar exclusão")
+        )
+      )
+    ),
+    // Topbar
+    cr("div",{style:{display:"flex",alignItems:"center",justifyContent:"space-between",marginBottom:14,flexWrap:"wrap",gap:8}},
+      cr("div",{style:{display:"flex",alignItems:"center",gap:10}},
+        cr("div",{style:{width:34,height:34,borderRadius:8,background:"#6d5ae6",display:"flex",alignItems:"center",justifyContent:"center"}},cr("span",{style:{color:"#fff",fontWeight:500,fontSize:12}},"GP")),
+        cr("div",null,cr("p",{style:{margin:0,fontWeight:500,fontSize:15,color:T.text}},"Gestão de Desempenho"),cr("p",{style:{margin:0,fontSize:11,color:T.textSec}},"Painel do Gestor"))
+      ),
+      cr("div",{style:{display:"flex",gap:6,alignItems:"center"}},
+        ...navItems.map(n=>cr("button",{key:n.id,onClick:()=>setPg(n.id),style:{padding:"5px 12px",fontSize:12,borderRadius:20,cursor:"pointer",fontWeight:500,background:pg===n.id?"#6d5ae6":T.bgSec,color:pg===n.id?"#fff":T.textSec,border:`0.5px solid ${pg===n.id?"#6d5ae6":T.border}`}},n.l)),
+        cr("button",{onClick:()=>setDark(d=>!d),style:{width:34,height:34,borderRadius:8,border:`0.5px solid ${T.border}`,background:T.bgSec,cursor:"pointer",fontSize:15,display:"flex",alignItems:"center",justifyContent:"center",color:T.text}},dark?"☀":"☾"),
+        cr("button",{onClick:window.logout,style:{padding:"5px 12px",fontSize:12,borderRadius:20,cursor:"pointer",fontWeight:500,background:"#E24B4A",color:"#fff",border:"none"}},"Logout")
+      )
+    ),
+    // KPIs
+    cr("div",{style:{display:"grid",gridTemplateColumns:"repeat(auto-fit,minmax(120px,1fr))",gap:10,marginBottom:14}},
+      ...(()=>{const filteredCols=setorSelecionado?cols.filter(c=>c.area===setorSelecionado):cols;return [{l:"Colaboradores",v:filteredCols.length},{l:"Média Geral",v:(filteredCols.reduce((a,c)=>a+parseFloat(avg(c)),0)/filteredCols.length||0).toFixed(1)+" / 10"},{l:"Metas ativas",v:filteredCols.reduce((a,c)=>a+c.metas.length,0)},{l:"PDIs ativos",v:filteredCols.reduce((a,c)=>a+c.pdi.length,0)},{l:"Stars",v:filteredCols.filter(c=>c.potencial===2&&c.desempenho===2).length}];})().map(card=>
+        cr("div",{key:card.l,style:{background:T.bgSec,borderRadius:8,padding:"10px 14px"}},cr("p",{style:{margin:0,fontSize:11,color:T.textSec}},card.l),cr("p",{style:{margin:0,fontSize:20,fontWeight:500,color:T.text}},card.v))
+      )
+    ),
+
+    // COLABORADORES
+    pg==="colaboradores"&&col&&cr("div",{style:{display:"flex",gap:12,flexWrap:"wrap"}},
+      // Lista
+      cr("div",{style:{width:185,flexShrink:0}},
+        cr("div",{style:{display:"flex",justifyContent:"space-between",alignItems:"center",marginBottom:8}},
+          cr("p",{style:{fontSize:12,color:T.textSec,margin:0,fontWeight:500}},"Colaboradores"),
+          cr("button",{onClick:()=>setShowNC(v=>!v),style:{fontSize:11,padding:"3px 8px",borderRadius:12,cursor:"pointer",background:"#6d5ae6",color:"#fff",border:"none",fontWeight:500}},"+ Novo")
+        ),
+        cr("input",{type:"text",placeholder:"🔍 Buscar...",value:buscaColaborador,onChange:e=>setBuscaColaborador(e.target.value),style:{...inp,marginBottom:6,fontSize:12,padding:"6px 8px"}}),
+        cr("div",{style:{marginBottom:8,display:"flex",gap:4,flexWrap:"wrap"}},
+          ...[{label:"Todos",value:""},...Array.from(new Set(cols.map(c=>c.area))).sort().map(s=>({label:s,value:s}))].map(s=>
+            cr("button",{key:s.value,onClick:()=>setSetorSelecionado(s.value),style:{fontSize:10,padding:"4px 10px",borderRadius:14,cursor:"pointer",background:setorSelecionado===s.value?"#6d5ae6":T.bgSec,color:setorSelecionado===s.value?"#fff":T.textSec,border:`0.5px solid ${setorSelecionado===s.value?"#6d5ae6":T.border}`,fontWeight:500,transition:"all 0.2s"}},s.label)
+          )
+        ),
+        showNC&&cr("div",{style:{background:T.bgSec,borderRadius:8,padding:"10px",marginBottom:8,border:`0.5px solid ${T.border}`}},
+          cr("p",{style:{margin:"0 0 6px",fontSize:12,fontWeight:500,color:T.text}},"Novo colaborador"),
+          ...["nome","cargo","area"].map((k,pi)=>cr("input",{key:k,placeholder:["Nome completo","Cargo","Área"][pi],value:novoC[k],onChange:ev=>{const val=ev.target.value;setNovoC(prev=>({...prev,[k]:val}))},style:{...inp,marginBottom:5,fontSize:12,padding:"5px 8px"}})),
+          cr("div",{style:{display:"flex",gap:4,marginTop:4}},
+            cr("button",{style:{...bs(T.bgTer,T.textSec),flex:1,fontSize:11},onClick:()=>setShowNC(false)},"Cancelar"),
+            cr("button",{style:{...bs("#6d5ae6","#fff"),flex:1,fontSize:11},onClick:addCol},"Salvar")
+          )
+        ),
+        ...(setorSelecionado?cols.filter(c=>c.area===setorSelecionado):cols).filter(c=>buscaColaborador?c.nome.toLowerCase().includes(buscaColaborador.toLowerCase()):true).map(c=>cr("div",{key:c.id,style:{position:"relative"}},
+          cr("div",{onClick:()=>{setSelId(c.id);setAba("visao");setBuscaColaborador("");},style:{padding:"9px 10px",paddingRight:28,borderRadius:8,cursor:"pointer",marginBottom:5,background:selId===c.id?(dark?"#312e6e":"#ede9fe"):T.bgSec,border:`0.5px solid ${selId===c.id?"#6d5ae6":T.border}`}},
+            cr("div",{style:{display:"flex",alignItems:"center",gap:7}},
+              cr("div",{style:{width:28,height:28,borderRadius:"50%",background:selId===c.id?"#6d5ae6":"#888",display:"flex",alignItems:"center",justifyContent:"center",fontSize:10,color:"#fff",fontWeight:500,flexShrink:0}},c.avatar),
+              cr("div",{style:{minWidth:0}},cr("p",{style:{margin:0,fontSize:12,fontWeight:500,color:T.text,whiteSpace:"nowrap",overflow:"hidden",textOverflow:"ellipsis"}},c.nome),cr("p",{style:{margin:0,fontSize:10,color:T.textSec}},c.area+" · "+avg(c)))
+            )
+          ),
+          cr("button",{onClick:ev=>{ev.stopPropagation();setConfirmDel(c);},style:{position:"absolute",right:6,top:"50%",transform:"translateY(-50%)",background:"transparent",border:"none",cursor:"pointer",color:"#ef4444",fontSize:14,padding:"2px 4px",lineHeight:1}},"✕")
+        )),
+        (buscaColaborador||setorSelecionado)&&(setorSelecionado?cols.filter(c=>c.area===setorSelecionado):cols).filter(c=>buscaColaborador?c.nome.toLowerCase().includes(buscaColaborador.toLowerCase()):true).length===0&&cr("div",{style:{padding:"12px",textAlign:"center",fontSize:12,color:T.textSec,background:T.bgSec,borderRadius:8}},`❌ Nenhum colaborador encontrado${buscaColaborador?` com "${buscaColaborador}"`:setorSelecionado?` no setor "${setorSelecionado}"`:""}`)
+      ),
+      // Detalhe
+      cr("div",{style:{flex:1,minWidth:0}},
+        cr(Card,{style:{marginBottom:10}},
+          cr("div",{style:{display:"flex",alignItems:"center",gap:12}},
+            cr("div",{style:{width:44,height:44,borderRadius:"50%",background:"#6d5ae6",display:"flex",alignItems:"center",justifyContent:"center",fontSize:15,color:"#fff",fontWeight:500}},col.avatar),
+            cr("div",{style:{flex:1}},
+              cr("p",{style:{margin:0,fontWeight:500,fontSize:16,color:T.text}},col.nome),
+              editingInfo ? cr("div",{style:{display:"flex",gap:8,alignItems:"center",marginTop:4}},
+                cr("input",{type:"text",value:tempCargo,onChange:e=>setTempCargo(e.target.value),placeholder:"Cargo",style:{...inp,fontSize:12,padding:"4px 8px",width:120}}),
+                cr("select",{value:tempArea,onChange:e=>setTempArea(e.target.value),style:{...inp,fontSize:12,padding:"4px 8px",width:100}},
+                  ...Array.from(new Set(cols.map(c=>c.area))).sort().map(a=>cr("option",{key:a,value:a},a))
+                ),
+                cr("button",{onClick:()=>{setCols(p=>p.map(c=>c.id===col.id?{...c,cargo:tempCargo,area:tempArea}:c));setEditingInfo(false);},style:{...bs("#1D9E75","#fff"),fontSize:11,padding:"4px 8px"}},"Salvar"),
+                cr("button",{onClick:()=>setEditingInfo(false),style:{background:"transparent",border:"none",fontSize:12,color:T.textSec,cursor:"pointer"}},"Cancelar")
+              ) : cr("p",{style:{margin:0,fontSize:12,color:T.textSec}},col.cargo+" · "+col.area)
+            ),
+            cr("div",{style:{textAlign:"right"}},cr("p",{style:{margin:0,fontSize:22,fontWeight:500,color:"#6d5ae6"}},avg(col)),cr("p",{style:{margin:0,fontSize:11,color:T.textSec}},"média / 10")),
+            cr("button",{onClick:()=>{setEditingInfo(true);setTempCargo(col.cargo);setTempArea(col.area);},style:{background:dark?"rgba(109,90,230,0.15)":"rgba(109,90,230,0.08)",border:"0.5px solid rgba(109,90,230,0.3)",borderRadius:6,color:"#6d5ae6",fontSize:12,padding:"6px 12px",cursor:"pointer",fontWeight:500,marginRight:8}},"Editar"),
+            cr("button",{onClick:()=>setConfirmDel(col),style:{background:dark?"rgba(239,68,68,0.15)":"rgba(220,38,38,0.08)",border:"0.5px solid rgba(220,38,38,0.3)",borderRadius:6,color:"#ef4444",fontSize:12,padding:"6px 12px",cursor:"pointer",fontWeight:500}},"Excluir")
+          )
+        ),
+        cr("div",{style:{display:"flex",gap:4,marginBottom:12,flexWrap:"wrap"}},
+          ...abas.map(a=>cr("button",{key:a.id,onClick:()=>setAba(a.id),style:{padding:"5px 12px",fontSize:12,borderRadius:20,cursor:"pointer",fontWeight:500,background:aba===a.id?"#6d5ae6":T.bgSec,color:aba===a.id?"#fff":T.textSec,border:`0.5px solid ${aba===a.id?"#6d5ae6":T.border}`}},a.l))
+        ),
+
+        // VISÃO GERAL
+        aba==="visao"&&cr("div",null,
+          cr("div",{style:{display:"flex",justifyContent:"flex-end",marginBottom:12}},
+            cr("button",{style:bs(aiAnalysisLoad?"#999":"#6d5ae6","#fff"),onClick:analisarFuncionario,disabled:aiAnalysisLoad},aiAnalysisLoad?"Analisando...":"📊 Análise Completa com IA")
+          ),
+          aiAnalysis&&cr(Card,{style:{marginBottom:14,background:dark?"rgba(109,90,230,0.08)":"rgba(109,90,230,0.05)",borderColor:"#6d5ae6"}},
+            cr("p",{style:{margin:"0 0 12px",fontSize:14,fontWeight:600,color:"#6d5ae6"}},"🤖 Análise Estratégica do Funcionário"),
+            cr("div",{style:{fontSize:12,lineHeight:1.6,color:T.text,whiteSpace:"pre-wrap",wordWrap:"break-word"}},aiAnalysis)
+          ),
+          cr("div",{style:{display:"grid",gridTemplateColumns:"1fr 1fr",gap:10}},
+            cr(Card,null,cr("p",{style:{margin:"0 0 2px",fontSize:13,fontWeight:500,color:"#6d5ae6"}},"Soft Skills — Radar"),cr("p",{style:{margin:"0 0 4px",fontSize:11,color:T.textSec}},"Média: "+med(col.softSkills).toFixed(1)+" / 4"),cr(RadarSingle,{skills:col.softSkills,labels:SS,cor:"#6d5ae6",fill:"rgba(109,90,230,0.15)",dark})),
+            cr(Card,null,cr("p",{style:{margin:"0 0 2px",fontSize:13,fontWeight:500,color:"#1D9E75"}},"Hard Skills — Radar"),cr("p",{style:{margin:"0 0 4px",fontSize:11,color:T.textSec}},"Média: "+med(col.hardSkills).toFixed(1)+" / 4"),cr(RadarSingle,{skills:col.hardSkills,labels:HS,cor:"#1D9E75",fill:"rgba(29,158,117,0.15)",dark})),
+            cr(Card,null,
+              cr("p",{style:{margin:"0 0 8px",fontSize:13,fontWeight:500,color:T.text}},"Últimos feedbacks"),
+              ...col.feedbacks.slice(0,2).map(f=>cr("div",{key:f.id,style:{marginBottom:8,paddingBottom:8,borderBottom:`0.5px solid ${T.border}`}},
+                cr("div",{style:{display:"flex",gap:6,alignItems:"center",marginBottom:3}},cr(Badge,{color:f.tipo==="positivo"?"#0F6E56":"#993C1D",bg:f.tipo==="positivo"?"#E1F5EE":"#FAECE7"},f.tipo==="positivo"?"Positivo":"Desenvolvimento"),cr("span",{style:{fontSize:11,color:T.textSec}},f.data)),
+                cr("p",{style:{margin:0,fontSize:12,color:T.textSec}},f.texto)
+              ))
+            ),
+            cr(Card,null,
+              cr("p",{style:{margin:"0 0 8px",fontSize:13,fontWeight:500,color:T.text}},"Progresso de metas"),
+              ...col.metas.slice(0,2).map(m=>cr("div",{key:m.id,style:{marginBottom:8}},
+                cr("p",{style:{margin:"0 0 3px",fontSize:12,color:T.text}},m.titulo),
+                cr("div",{style:{display:"flex",alignItems:"center",gap:8}},
+                  cr("div",{style:{flex:1,height:6,background:T.bgTer,borderRadius:4,overflow:"hidden"}},cr("div",{style:{height:"100%",width:`${m.progresso}%`,background:"#6d5ae6",borderRadius:4}})),
+                  cr("span",{style:{fontSize:11,fontWeight:500,color:"#6d5ae6",minWidth:28}},m.progresso+"%")
+                )
+              ))
+            )
+          )
+        ),
+
+        // SKILLS
+        aba==="skills"&&cr("div",null,
+          cr("div",{style:{display:"flex",justifyContent:"flex-end",marginBottom:10}},
+            !editSk?cr("button",{style:bs("#6d5ae6","#fff"),onClick:()=>{setEditSk(true);setTS([...col.softSkills]);setTH([...col.hardSkills]);}},"Avaliar skills"):
+            cr("div",{style:{display:"flex",gap:8}},cr("button",{style:bs(T.bgSec,T.textSec),onClick:()=>setEditSk(false)},"Cancelar"),cr("button",{style:bs("#1D9E75","#fff"),onClick:salvarSk},"Salvar avaliação"))
+          ),
+          !editSk&&cr("div",{style:{display:"grid",gridTemplateColumns:"1fr 1fr",gap:12,marginBottom:14}},
+            cr(Card,null,cr("p",{style:{margin:"0 0 4px",fontSize:13,fontWeight:500,color:"#6d5ae6"}},"Soft Skills"),cr(RadarSingle,{skills:col.softSkills,labels:SS,cor:"#6d5ae6",fill:"rgba(109,90,230,0.15)",dark})),
+            cr(Card,null,cr("p",{style:{margin:"0 0 4px",fontSize:13,fontWeight:500,color:"#1D9E75"}},"Hard Skills"),cr(RadarSingle,{skills:col.hardSkills,labels:HS,cor:"#1D9E75",fill:"rgba(29,158,117,0.15)",dark}))
+          ),
+          cr("div",{style:{display:"grid",gridTemplateColumns:"1fr 1fr",gap:12}},
+            ...[{lb:"Soft Skills",sk:col.softSkills,tmp:tSoft,setT:setTS,cor:"#6d5ae6",list:SS},{lb:"Hard Skills",sk:col.hardSkills,tmp:tHard,setT:setTH,cor:"#1D9E75",list:HS}].map(({lb,sk,tmp,setT,cor,list})=>
+              cr(Card,{key:lb},
+                cr("p",{style:{margin:"0 0 10px",fontSize:13,fontWeight:500,color:cor}},lb),
+                ...list.map((label,i)=>cr("div",{key:i,style:{marginBottom:editSk?10:8}},
+                  cr("div",{style:{display:"flex",justifyContent:"space-between",fontSize:12,marginBottom:3}},
+                    cr("span",{style:{color:T.textSec}},label),
+                    !editSk&&cr("span",{style:{color:MAT_C[sk[i]],fontWeight:500,fontSize:11}},MAT[sk[i]])
+                  ),
+                  !editSk?cr("div",{style:{height:6,background:T.bgTer,borderRadius:4,overflow:"hidden"}},cr("div",{style:{height:"100%",width:`${(sk[i]/4)*100}%`,background:cor,borderRadius:4,transition:"width .4s"}})):
+                  cr("div",{style:{display:"flex",gap:3}},
+                    ...MAT.map((m,j)=>cr("button",{key:j,onClick:()=>{const n=[...tmp];n[i]=j;setT(n);},style:{flex:1,padding:"3px 1px",fontSize:9,borderRadius:4,cursor:"pointer",fontWeight:500,background:tmp[i]===j?cor:T.bgSec,color:tmp[i]===j?"#fff":T.textSec,border:`0.5px solid ${tmp[i]===j?cor:T.border}`}},m.slice(0,5)))
+                  )
+                ))
+              )
+            )
+          )
+        ),
+
+        // METAS
+        aba==="metas"&&cr("div",null,
+          cr("div",{style:{display:"flex",justifyContent:"flex-end",marginBottom:10}},cr("button",{style:bs("#6d5ae6","#fff"),onClick:()=>setShowMeta(v=>!v)},"+ Nova meta")),
+          showMeta&&cr(Card,{style:{marginBottom:12,background:T.bgSec}},
+            cr("p",{style:{margin:"0 0 10px",fontSize:13,fontWeight:500,color:T.text}},"Nova meta"),
+            cr("div",{style:{display:"grid",gap:8}},
+              cr("input",{placeholder:"Título da meta",value:nMeta.titulo,onChange:e=>{const val=e.target.value;setNMeta(prev=>({...prev,titulo:val}))},style:inp}),
+              cr("input",{placeholder:"OKR / resultado-chave",value:nMeta.okr,onChange:e=>{const val=e.target.value;setNMeta(prev=>({...prev,okr:val}))},style:inp}),
+              cr("div",{style:{display:"flex",gap:8}},cr("input",{type:"number",placeholder:"%",min:0,max:100,value:nMeta.progresso,onChange:e=>{const val=e.target.value;setNMeta(prev=>({...prev,progresso:val}))},style:{...inp,width:"25%"}}),cr("input",{type:"date",value:nMeta.prazo,onChange:e=>{const val=e.target.value;setNMeta(prev=>({...prev,prazo:val}))},style:{...inp,flex:1}})),
+              cr("div",{style:{display:"flex",gap:8,justifyContent:"flex-end"}},cr("button",{style:bs(T.bgTer,T.textSec),onClick:()=>setShowMeta(false)},"Cancelar"),cr("button",{style:bs("#6d5ae6","#fff"),onClick:addMeta},"Salvar"))
+            )
+          ),
+          ...col.metas.map(m=>cr(Card,{key:m.id,style:{marginBottom:8}},
+            cr("div",{style:{display:"flex",justifyContent:"space-between",marginBottom:6}},cr("p",{style:{margin:0,fontWeight:500,fontSize:14,color:T.text}},m.titulo),cr("span",{style:{fontSize:11,color:T.textSec}},"Prazo: "+m.prazo)),
+            cr("p",{style:{margin:"0 0 8px",fontSize:12,color:T.textSec}},m.okr),
+            cr("div",{style:{display:"flex",alignItems:"center",gap:10}},cr("div",{style:{flex:1,height:8,background:T.bgTer,borderRadius:4,overflow:"hidden"}},cr("div",{style:{height:"100%",width:`${m.progresso}%`,background:m.progresso>=80?"#1D9E75":m.progresso>=50?"#6d5ae6":"#EF9F27",borderRadius:4}})),cr("span",{style:{fontSize:13,fontWeight:500,color:T.text,minWidth:36}},m.progresso+"%"))
+          ))
+        ),
+
+        // FEEDBACKS
+        aba==="feedback"&&cr("div",null,
+          cr("div",{style:{display:"flex",justifyContent:"flex-end",marginBottom:10}},cr("button",{style:bs("#6d5ae6","#fff"),onClick:()=>setShowFb(v=>!v)},"+ Novo feedback")),
+          showFb&&cr(Card,{style:{marginBottom:12,background:T.bgSec}},
+            cr("p",{style:{margin:"0 0 10px",fontSize:13,fontWeight:500,color:T.text}},"Registrar feedback"),
+            cr("div",{style:{display:"grid",gap:8}},
+              cr("select",{value:nFb.tipo,onChange:e=>{const val=e.target.value;setNFb(prev=>({...prev,tipo:val}))},style:inp},cr("option",{value:"positivo"},"Positivo"),cr("option",{value:"desenvolvimento"},"Desenvolvimento")),
+              cr("input",{placeholder:"Seu nome",value:nFb.autor,onChange:e=>{const val=e.target.value;setNFb(prev=>({...prev,autor:val}))},style:inp}),
+              cr("textarea",{placeholder:"Descreva o feedback...",rows:3,value:nFb.texto,onChange:e=>{const val=e.target.value;setNFb(prev=>({...prev,texto:val}))},style:{...inp,resize:"vertical"}}),
+              cr("div",{style:{display:"flex",gap:8,justifyContent:"flex-end"}},cr("button",{style:bs(T.bgTer,T.textSec),onClick:()=>setShowFb(false)},"Cancelar"),cr("button",{style:bs("#6d5ae6","#fff"),onClick:addFb},"Salvar"))
+            )
+          ),
+          ...col.feedbacks.map(f=>cr(Card,{key:f.id,style:{marginBottom:8}},
+            cr("div",{style:{display:"flex",gap:8,alignItems:"center",marginBottom:6}},cr(Badge,{color:f.tipo==="positivo"?"#0F6E56":"#993C1D",bg:f.tipo==="positivo"?"#E1F5EE":"#FAECE7"},f.tipo==="positivo"?"Positivo":"Desenvolvimento"),cr("span",{style:{fontSize:11,color:T.textSec}},f.data),cr("span",{style:{fontSize:11,color:T.textSec,marginLeft:"auto"}},"por "+f.autor)),
+            cr("p",{style:{margin:0,fontSize:13,color:T.text}},f.texto)
+          ))
+        ),
+
+        // PDI
+        aba==="pdi"&&cr("div",null,
+          cr("div",{style:{display:"flex",justifyContent:"space-between",alignItems:"center",marginBottom:10}},
+            cr("button",{style:bs("#6d5ae6","#fff"),onClick:()=>setShowPdi(v=>!v)},"+ Nova ação"),
+            cr("button",{style:bs(aiLoad?"#888":"#1D9E75","#fff"),onClick:gerarIA,disabled:aiLoad},aiLoad?"Gerando...":"Sugestões com IA")
+          ),
+          showPdi&&cr(Card,{style:{marginBottom:12,background:T.bgSec}},
+            cr("p",{style:{margin:"0 0 10px",fontSize:13,fontWeight:500,color:T.text}},"Nova ação — PDI"),
+            cr("div",{style:{display:"grid",gap:8}},
+              cr("input",{placeholder:"Competência",value:nPdi.competencia,onChange:e=>{const val=e.target.value;setNPdi(prev=>({...prev,competencia:val}))},style:inp}),
+              cr("input",{placeholder:"Ação / atividade",value:nPdi.acao,onChange:e=>{const val=e.target.value;setNPdi(prev=>({...prev,acao:val}))},style:inp}),
+              cr("div",{style:{display:"flex",gap:8}},cr("input",{type:"date",value:nPdi.prazo,onChange:e=>{const val=e.target.value;setNPdi(prev=>({...prev,prazo:val}))},style:{...inp,flex:1}}),cr("select",{value:nPdi.status,onChange:e=>{const val=e.target.value;setNPdi(prev=>({...prev,status:val}))},style:{...inp,width:"40%"}},cr("option",{value:"pendente"},"Pendente"),cr("option",{value:"em andamento"},"Em andamento"),cr("option",{value:"concluido"},"Concluído"))),
+              cr("div",{style:{display:"flex",gap:8,justifyContent:"flex-end"}},cr("button",{style:bs(T.bgTer,T.textSec),onClick:()=>setShowPdi(false)},"Cancelar"),cr("button",{style:bs("#6d5ae6","#fff"),onClick:addPdi},"Salvar"))
+            )
+          ),
+          aiLoad&&cr(Card,{style:{marginBottom:12,textAlign:"center",padding:20}},cr("p",{style:{margin:0,fontSize:13,color:T.textSec}},"A IA está analisando o perfil de "+col.nome+"...")),
+          aiSug&&aiSug.length>0&&cr("div",{style:{marginBottom:14}},
+            cr("p",{style:{margin:"0 0 8px",fontSize:13,fontWeight:500,color:"#1D9E75"}},"Sugestões da IA para "+col.nome),
+            ...aiSug.map((s,i)=>cr(Card,{key:i,style:{marginBottom:8,borderColor:"#5DCAA5"}},
+              cr("div",{style:{display:"flex",justifyContent:"space-between",alignItems:"flex-start"}},
+                cr("div",{style:{flex:1}},cr("p",{style:{margin:0,fontWeight:500,fontSize:13,color:T.text}},s.acao),cr("p",{style:{margin:"2px 0 0",fontSize:12,color:"#1D9E75"}},"Competência: "+s.competencia),cr("p",{style:{margin:"4px 0 0",fontSize:12,color:T.textSec}},s.justificativa)),
+                cr("button",{style:{...bs("#1D9E75","#fff"),fontSize:11,padding:"4px 10px",marginLeft:8,flexShrink:0},onClick:()=>addSug(s)},"+ Adicionar")
+              )
+            ))
+          ),
+          ...col.pdi.map(p=>cr(Card,{key:p.id,style:{marginBottom:8}},
+            cr("div",{style:{display:"flex",justifyContent:"space-between",alignItems:"flex-start",marginBottom:4}},
+              cr("div",null,cr("p",{style:{margin:0,fontWeight:500,fontSize:14,color:T.text}},p.acao),p.competencia&&cr("p",{style:{margin:"2px 0 0",fontSize:12,color:T.textSec}},"Competência: "+p.competencia)),
+              cr(Badge,{color:SC[p.status],bg:SB[p.status]},p.status)
+            ),
+            p.prazo&&cr("p",{style:{margin:"4px 0 0",fontSize:11,color:T.textSec}},"Prazo: "+p.prazo)
+          ))
+        ),
+
+        // HISTÓRICO
+        aba==="historico"&&cr(Card,null,
+          cr("p",{style:{margin:"0 0 16px",fontSize:13,fontWeight:500,color:T.text}},"Evolução de desempenho"),
+          cr("div",{style:{display:"flex",alignItems:"flex-end",gap:10,height:130,marginBottom:12}},
+            ...col.historico.map((h,i)=>{
+              const pct=(h.mediaGeral/4)*100,cor=h.mediaGeral>=3.5?"#6d5ae6":h.mediaGeral>=2.5?"#378ADD":"#EF9F27";
+              return cr("div",{key:i,style:{display:"flex",flexDirection:"column",alignItems:"center",gap:4,flex:1}},
+                cr("span",{style:{fontSize:12,fontWeight:500,color:cor}},h.mediaGeral),
+                cr("div",{style:{width:"80%",background:cor,borderRadius:"4px 4px 0 0",height:`${pct}%`,transition:"height .4s"}}),
+                cr("span",{style:{fontSize:10,color:T.textSec}},h.periodo)
+              );
+            })
+          ),
+          cr("div",{style:{borderTop:`0.5px solid ${T.border}`,paddingTop:10}},
+            ...col.historico.map((h,i)=>cr("div",{key:i,style:{display:"flex",justifyContent:"space-between",padding:"4px 0",fontSize:13}},cr("span",{style:{color:T.textSec}},h.periodo),cr("span",{style:{fontWeight:500,color:T.text}},h.mediaGeral+" / 10")))
+          )
+        )
+      )
+    ),
+
+    // NINE BOX
+    pg==="ninebox"&&cr("div",null,
+      cr("p",{style:{fontSize:13,color:T.textSec,marginBottom:12}},"Posicione cada colaborador no grid. Eixo X = Desempenho · Eixo Y = Potencial."),
+      cr("div",{style:{display:"flex",gap:16,flexWrap:"wrap"}},
+        cr("div",{style:{flex:1,minWidth:280}},
+          cr("div",{style:{display:"flex",alignItems:"flex-start",gap:4}},
+            cr("span",{style:{fontSize:11,color:T.textSec,writingMode:"vertical-rl",transform:"rotate(180deg)",minWidth:18,textAlign:"center",marginTop:10}},"Potencial"),
+            cr("div",{style:{flex:1}},
+              ...["Alto","Médio","Baixo"].map((pot,row)=>cr("div",{key:row,style:{display:"flex",gap:4,marginBottom:4}},
+                cr("span",{style:{fontSize:10,color:T.textSec,minWidth:36,display:"flex",alignItems:"center",justifyContent:"flex-end",paddingRight:6}},pot),
+                ...["Baixo","Médio","Alto"].map((des,col2)=>{
+                  const potIdx=2-row,desIdx=col2,here=cols.filter(c=>c.potencial===potIdx&&c.desempenho===desIdx);
+                  const bg=dark?NC_D[row][col2]:NC_L[row][col2],tc=dark?NT_D[row][col2]:NT_L[row][col2];
+                  return cr("div",{key:col2,style:{flex:1,minHeight:82,background:bg,borderRadius:8,padding:"8px",border:`0.5px solid ${T.border}`},onDragOver:(e)=>e.preventDefault(),onDrop:(e)=>{const id=parseInt(e.dataTransfer.getData("text/plain"));setCols(p=>p.map(c=>c.id===id?{...c,potencial:potIdx,desempenho:desIdx}:c));}},
+                    cr("p",{style:{margin:"0 0 5px",fontSize:10,fontWeight:500,color:tc}},NL[row][col2]),
+                    ...here.map(c=>cr("div",{key:c.id,draggable:true,onDragStart:(e)=>e.dataTransfer.setData("text/plain",c.id),style:{background:dark?"rgba(255,255,255,0.1)":"rgba(255,255,255,0.75)",borderRadius:4,padding:"2px 6px",marginBottom:3,fontSize:11,color:dark?"#f9fafb":"#333",fontWeight:500,cursor:"grab"}},c.nome.split(" ")[0]))
+                  );
+                })
+              )),
+              cr("div",{style:{display:"flex",paddingLeft:42,gap:4}},...["Baixo","Médio","Alto"].map(d=>cr("span",{key:d,style:{flex:1,textAlign:"center",fontSize:10,color:T.textSec}},d))),
+              cr("p",{style:{textAlign:"center",fontSize:10,color:T.textSec,margin:"4px 0 0"}},"Desempenho")
+            )
+          )
+        ),
+        cr("div",{style:{minWidth:220}},
+          cr("p",{style:{fontSize:13,fontWeight:500,margin:"0 0 10px",color:T.text}},"Posicionar colaboradores"),
+          ...cols.map(c=>cr(Card,{key:c.id,style:{marginBottom:8}},
+            cr("div",{style:{display:"flex",alignItems:"center",gap:8,marginBottom:8}},cr("div",{style:{width:28,height:28,borderRadius:"50%",background:"#6d5ae6",display:"flex",alignItems:"center",justifyContent:"center",fontSize:10,color:"#fff",fontWeight:500}},c.avatar),cr("p",{style:{margin:0,fontSize:13,fontWeight:500,color:T.text}},c.nome)),
+            cr("div",{style:{display:"grid",gridTemplateColumns:"1fr 1fr",gap:6}},
+              cr("div",null,cr("p",{style:{margin:"0 0 3px",fontSize:11,color:T.textSec}},"Potencial"),cr("select",{value:c.potencial,onChange:e=>updNB(c.id,parseInt(e.target.value),c.desempenho),style:{...inp,padding:"4px 6px",fontSize:12}},cr("option",{value:0},"Baixo"),cr("option",{value:1},"Médio"),cr("option",{value:2},"Alto"))),
+              cr("div",null,cr("p",{style:{margin:"0 0 3px",fontSize:11,color:T.textSec}},"Desempenho"),cr("select",{value:c.desempenho,onChange:e=>updNB(c.id,c.potencial,parseInt(e.target.value)),style:{...inp,padding:"4px 6px",fontSize:12}},cr("option",{value:0},"Baixo"),cr("option",{value:1},"Médio"),cr("option",{value:2},"Alto")))
+            )
+          ))
+        )
+      )
+    ),
+
+    // RELATÓRIO
+    pg==="relatorio"&&cr("div",null,
+      cr("div",{style:{display:"flex",justifyContent:"space-between",alignItems:"center",marginBottom:14}},cr("p",{style:{margin:0,fontSize:15,fontWeight:500,color:T.text}},"Relatório da equipe"),cr("div",{style:{display:"flex",gap:6}},cr("button",{style:bs("#6d5ae6","#fff"),onClick:exportar},"Exportar .txt"),cr("button",{style:bs("#1D9E75","#fff"),onClick:exportarExcel},"Exportar .xlsx"))),
+      cr(Card,{style:{marginBottom:10}},
+        cr("div",{style:{overflowX:"auto"}},
+          cr("table",{style:{width:"100%",borderCollapse:"collapse",fontSize:13}},
+            cr("thead",null,cr("tr",{style:{borderBottom:`0.5px solid ${T.border}`}},...["Colaborador","Área","Cargo","Média","Soft","Hard","Metas","PDIs","Nine Box"].map(h=>cr("th",{key:h,style:{textAlign:"left",padding:"6px 8px",fontSize:11,fontWeight:500,color:T.textSec}},h)))),
+            cr("tbody",null,...cols.map((c,i)=>{
+              const soft=med(c.softSkills).toFixed(1),hard=med(c.hardSkills).toFixed(1);
+              const nblabel=NL[2-c.potencial]?.[c.desempenho]||"-",nbbg=(dark?NC_D:NC_L)[2-c.potencial]?.[c.desempenho]||T.bgSec,nbtc=(dark?NT_D:NT_L)[2-c.potencial]?.[c.desempenho]||T.textSec;
+              return cr("tr",{key:c.id,style:{borderBottom:`0.5px solid ${T.border}`,background:i%2===0?"transparent":T.bgSec}},
+                cr("td",{style:{padding:"7px 8px",fontWeight:500,color:T.text,cursor:"pointer"},onClick:()=>{setHistoryCol(c);setShowHistory(true);}},c.nome),
+                cr("td",{style:{padding:"7px 8px",color:T.textSec}},c.area),
+                cr("td",{style:{padding:"7px 8px",color:T.textSec,fontSize:12}},c.cargo),
+                cr("td",{style:{padding:"7px 8px",fontWeight:500,color:"#6d5ae6"}},avg(c)),
+                cr("td",{style:{padding:"7px 8px",color:T.text}},soft),
+                cr("td",{style:{padding:"7px 8px",color:T.text}},hard),
+                cr("td",{style:{padding:"7px 8px",color:T.text}},c.metas.length),
+                cr("td",{style:{padding:"7px 8px",color:T.text}},c.pdi.length),
+                cr("td",{style:{padding:"7px 8px"}},cr(Badge,{color:nbtc,bg:nbbg},nblabel))
+              );
+            }))
+          )
+        )
+      ),
+      cr(Card,null,
+        cr("p",{style:{margin:"0 0 10px",fontSize:13,fontWeight:500,color:T.text}},"Distribuição por área"),
+        ...Object.entries(cols.reduce((acc,c)=>{acc[c.area]=(acc[c.area]||[]);acc[c.area].push(c);return acc;},{})).map(([area,cs])=>
+          cr("div",{key:area,style:{marginBottom:8}},
+            cr("div",{style:{display:"flex",justifyContent:"space-between",fontSize:12,marginBottom:3}},cr("span",{style:{fontWeight:500,color:T.text}},area),cr("span",{style:{color:T.textSec}},cs.length+" colaborador"+(cs.length>1?"es":"")+" · média "+(cs.reduce((a,c)=>a+parseFloat(avg(c)),0)/cs.length).toFixed(1))),
+            cr("div",{style:{height:6,background:T.bgTer,borderRadius:4,overflow:"hidden"}},cr("div",{style:{height:"100%",width:`${(cs.length/cols.length)*100}%`,background:"#6d5ae6",borderRadius:4}}))
+          )
+        )
+      )
+    ),
+
+    // Modal histórico
+    showHistory&&historyCol&&cr("div",{style:{position:"fixed",inset:0,background:"rgba(0,0,0,0.55)",zIndex:200,display:"flex",alignItems:"center",justifyContent:"center",padding:"16px"}},
+      cr("div",{style:{background:T.card,border:`0.5px solid ${T.border}`,borderRadius:12,padding:24,maxWidth:600,width:"100%",maxHeight:"80vh",overflow:"auto"}},
+        cr("div",{style:{display:"flex",justifyContent:"space-between",alignItems:"center",marginBottom:20}},
+          cr("h3",{style:{margin:0,fontSize:18,fontWeight:600,color:T.text}},"Histórico de "+historyCol.nome),
+          cr("div",{style:{display:"flex",gap:8}},
+            cr("button",{onClick:()=>exportarHistoricoPDF(historyCol),style:{...bs("#1D9E75","#fff"),fontSize:12,padding:"6px 12px"}},"📄 Exportar PDF"),
+            cr("button",{onClick:()=>setShowHistory(false),style:{background:"transparent",border:"none",fontSize:20,cursor:"pointer",color:T.textSec}},"×")
+          )
+        ),
+        // General info
+        cr("div",{style:{marginBottom:20}},
+          cr("h4",{style:{margin:"0 0 10px",fontSize:14,fontWeight:500,color:T.text}},"Informações Gerais"),
+          cr("p",{style:{margin:0,fontSize:13,color:T.textSec}},"Cargo: "+historyCol.cargo),
+          cr("p",{style:{margin:0,fontSize:13,color:T.textSec}},"Área: "+historyCol.area),
+          cr("p",{style:{margin:0,fontSize:13,color:T.textSec}},"Média atual: "+avg(historyCol)+"/10.0")
+        ),
+        // PDI
+        cr("div",{style:{marginBottom:20}},
+          cr("h4",{style:{margin:"0 0 10px",fontSize:14,fontWeight:500,color:T.text}},"PDI"),
+          historyCol.pdi.length ? historyCol.pdi.map(p=>cr("div",{key:p.id,style:{marginBottom:8,padding:"8px",background:T.bgSec,borderRadius:6}},
+            cr("p",{style:{margin:0,fontWeight:500,fontSize:13,color:T.text}},p.acao),
+            cr("p",{style:{margin:"2px 0 0",fontSize:12,color:T.textSec}},"Competência: "+p.competencia),
+            cr("div",{style:{display:"flex",justifyContent:"space-between",alignItems:"center"}},
+              cr("span",{style:{fontSize:11,color:T.textSec}},"Prazo: "+p.prazo),
+              cr(Badge,{color:SC[p.status],bg:SB[p.status]},p.status)
+            )
+          )) : cr("p",{style:{margin:0,fontSize:13,color:T.textSec}},"Nenhum PDI registrado.")
+        ),
+        // Feedbacks
+        cr("div",{style:{marginBottom:20}},
+          cr("h4",{style:{margin:"0 0 10px",fontSize:14,fontWeight:500,color:T.text}},"Feedbacks"),
+          historyCol.feedbacks.length ? historyCol.feedbacks.map(f=>cr("div",{key:f.id,style:{marginBottom:8,padding:"8px",background:T.bgSec,borderRadius:6}},
+            cr("div",{style:{display:"flex",gap:6,alignItems:"center",marginBottom:4}},
+              cr(Badge,{color:f.tipo==="positivo"?"#0F6E56":"#993C1D",bg:f.tipo==="positivo"?"#E1F5EE":"#FAECE7"},f.tipo==="positivo"?"Positivo":"Desenvolvimento"),
+              cr("span",{style:{fontSize:11,color:T.textSec}},f.data),
+              cr("span",{style:{fontSize:11,color:T.textSec,marginLeft:"auto"}},"por "+f.autor)
+            ),
+            cr("p",{style:{margin:0,fontSize:13,color:T.text}},f.texto)
+          )) : cr("p",{style:{margin:0,fontSize:13,color:T.textSec}},"Nenhum feedback registrado.")
+        ),
+        // Skills History
+        cr("div",{style:{marginBottom:20}},
+          cr("h4",{style:{margin:"0 0 10px",fontSize:14,fontWeight:500,color:T.text}},"Progressão de Skills"),
+          historyCol.skillsHistory.length ? historyCol.skillsHistory.slice().reverse().map((sh,i,arr)=>{
+            const prev = arr[i+1];
+            return cr("div",{key:sh.date,style:{marginBottom:8,padding:"8px",background:T.bgSec,borderRadius:6}},
+              cr("p",{style:{margin:"0 0 6px",fontSize:13,fontWeight:500,color:T.text}},sh.date),
+              cr("div",{style:{display:"grid",gridTemplateColumns:"1fr 1fr",gap:10}},
+                cr("div",null,
+                  cr("p",{style:{margin:"0 0 4px",fontSize:12,fontWeight:500,color:"#6d5ae6"}},"Soft Skills"),
+                  ...SS.map((s,j)=>{
+                    const prevLevel = prev ? MAT[prev.softSkills[j]] : "N/A";
+                    const currLevel = MAT[sh.softSkills[j]];
+                    return cr("p",{key:j,style:{margin:0,fontSize:11,color:T.textSec}},s+": "+(prevLevel !== currLevel ? prevLevel+" → "+currLevel : currLevel));
+                  })
+                ),
+                cr("div",null,
+                  cr("p",{style:{margin:"0 0 4px",fontSize:12,fontWeight:500,color:"#1D9E75"}},"Hard Skills"),
+                  ...HS.map((s,j)=>{
+                    const prevLevel = prev ? MAT[prev.hardSkills[j]] : "N/A";
+                    const currLevel = MAT[sh.hardSkills[j]];
+                    return cr("p",{key:j,style:{margin:0,fontSize:11,color:T.textSec}},s+": "+(prevLevel !== currLevel ? prevLevel+" → "+currLevel : currLevel));
+                  })
+                )
+              )
+            );
+          }) : cr("p",{style:{margin:0,fontSize:13,color:T.textSec}},"Nenhuma mudança de skills registrada.")
+        ),
+        // Ninebox History
+        cr("div",null,
+          cr("h4",{style:{margin:"0 0 10px",fontSize:14,fontWeight:500,color:T.text}},"Progressão Nine Box"),
+          historyCol.nineboxHistory.length ? historyCol.nineboxHistory.slice().reverse().map((nh,i,arr)=>{
+            const prev = arr[i+1];
+            const currLabel = NL[2-nh.potencial]?.[nh.desempenho] || "-";
+            const prevLabel = prev ? NL[2-prev.potencial]?.[prev.desempenho] || "-" : "N/A";
+            return cr("div",{key:nh.date,style:{marginBottom:8,padding:"8px",background:T.bgSec,borderRadius:6}},
+              cr("p",{style:{margin:0,fontSize:13,color:T.text}},nh.date+": "+(prevLabel !== currLabel ? prevLabel+" → "+currLabel : currLabel))
+            );
+          }) : cr("p",{style:{margin:0,fontSize:13,color:T.textSec}},"Nenhuma mudança no nine box registrada.")
+        )
+      )
+    )
+  );
+}
+window.addEventListener('error', function(event) {
+  const root = document.getElementById('root3');
+  if (root) {
+    root.innerHTML = `<div style="padding:24px;font-family:Inter,sans-serif;color:#c53030;background:#fff5f5;border:1px solid #fed7d7;border-radius:12px;"><h2 style="margin:0 0 8px;font-size:18px;color:#9b2c2c;">Erro ao carregar o painel</h2><pre style="white-space:pre-wrap;font-size:13px;color:#742a2a;">${event.message}</pre></div>`;
+  }
+});
+window.addEventListener('unhandledrejection', function(event) {
+  const root = document.getElementById('root3');
+  if (root) {
+    root.innerHTML = `<div style="padding:24px;font-family:Inter,sans-serif;color:#c53030;background:#fff5f5;border:1px solid #fed7d7;border-radius:12px;"><h2 style="margin:0 0 8px;font-size:18px;color:#9b2c2c;">Erro ao carregar o painel</h2><pre style="white-space:pre-wrap;font-size:13px;color:#742a2a;">${event.reason && event.reason.message ? event.reason.message : event.reason}</pre></div>`;
+  }
+});
+try {
+  ReactDOM.createRoot(document.getElementById("root3")).render(cr(App));
+} catch (e) {
+  const root = document.getElementById('root3');
+  if (root) {
+    root.innerHTML = `<div style="padding:24px;font-family:Inter,sans-serif;color:#c53030;background:#fff5f5;border:1px solid #fed7d7;border-radius:12px;"><h2 style="margin:0 0 8px;font-size:18px;color:#9b2c2c;">Erro ao iniciar o painel</h2><pre style="white-space:pre-wrap;font-size:13px;color:#742a2a;">${e.message}</pre></div>`;
+  }
+  console.error(e);
+}
+</script>

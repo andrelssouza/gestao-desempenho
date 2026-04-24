@@ -1,0 +1,481 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Gestão de Desempenho - Login</title>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+    html, body {
+      width: 100%;
+      height: 100%;
+      font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      overflow: hidden;
+    }
+    .auth-container {
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      height: 100vh;
+      padding: 20px;
+    }
+    .auth-card {
+      background: white;
+      border-radius: 16px;
+      box-shadow: 0 20px 40px rgba(0,0,0,0.1);
+      padding: 40px;
+      width: 100%;
+      max-width: 400px;
+      text-align: center;
+    }
+    .logo {
+      font-size: 28px;
+      font-weight: 700;
+      color: #6d5ae6;
+      margin-bottom: 8px;
+    }
+    .subtitle {
+      color: #6b7280;
+      margin-bottom: 32px;
+      font-size: 14px;
+    }
+    .form-group {
+      margin-bottom: 20px;
+      text-align: left;
+    }
+    .form-label {
+      display: block;
+      font-size: 14px;
+      font-weight: 500;
+      color: #374151;
+      margin-bottom: 6px;
+    }
+    .form-input {
+      width: 100%;
+      padding: 12px 16px;
+      border: 1px solid #d1d5db;
+      border-radius: 8px;
+      font-size: 16px;
+      transition: border-color 0.2s;
+    }
+    .form-input:focus {
+      outline: none;
+      border-color: #6d5ae6;
+      box-shadow: 0 0 0 3px rgba(109, 90, 230, 0.1);
+    }
+    .password-input-container {
+      position: relative;
+    }
+    .password-toggle {
+      position: absolute;
+      right: 12px;
+      top: 50%;
+      transform: translateY(-50%);
+      background: none;
+      border: none;
+      cursor: pointer;
+      font-size: 18px;
+      color: #6b7280;
+      padding: 4px;
+      transition: color 0.2s;
+    }
+    .password-toggle:hover {
+      color: #374151;
+    }
+    .btn {
+      width: 100%;
+      padding: 12px 16px;
+      border: none;
+      border-radius: 8px;
+      font-size: 16px;
+      font-weight: 500;
+      cursor: pointer;
+      transition: all 0.2s;
+      margin-bottom: 16px;
+    }
+    .btn-primary {
+      background: #6d5ae6;
+      color: white;
+    }
+    .btn-primary:hover {
+      background: #5b4fc9;
+    }
+    .btn-secondary {
+      background: #f3f4f6;
+      color: #374151;
+    }
+    .btn-secondary:hover {
+      background: #e5e7eb;
+    }
+    .divider {
+      margin: 24px 0;
+      position: relative;
+      text-align: center;
+    }
+    .divider::before {
+      content: '';
+      position: absolute;
+      top: 50%;
+      left: 0;
+      right: 0;
+      height: 1px;
+      background: #e5e7eb;
+    }
+    .divider-text {
+      background: white;
+      padding: 0 16px;
+      font-size: 14px;
+      color: #6b7280;
+      position: relative;
+      z-index: 1;
+    }
+    .link {
+      color: #6d5ae6;
+      text-decoration: none;
+      font-size: 14px;
+      cursor: pointer;
+    }
+    .link:hover {
+      text-decoration: underline;
+    }
+    .alert {
+      padding: 12px 16px;
+      border-radius: 8px;
+      margin-bottom: 16px;
+      font-size: 14px;
+    }
+    .alert-error {
+      background: #fef2f2;
+      color: #dc2626;
+      border: 1px solid #fecaca;
+    }
+    .alert-success {
+      background: #f0fdf4;
+      color: #16a34a;
+      border: 1px solid #bbf7d0;
+    }
+    .loading {
+      display: inline-block;
+      width: 16px;
+      height: 16px;
+      border: 2px solid #e5e7eb;
+      border-radius: 50%;
+      border-top-color: #6d5ae6;
+      animation: spin 1s ease-in-out infinite;
+      margin-right: 8px;
+    }
+    @keyframes spin {
+      to { transform: rotate(360deg); }
+    }
+  </style>
+</head>
+<body>
+  <div class="auth-container">
+    <div class="auth-card">
+      <div class="logo">Gestão de Desempenho</div>
+      <div class="subtitle">Sistema de Gestão de Performance</div>
+
+      <!-- Login Form -->
+      <div id="login-form">
+        <div class="form-group">
+          <label class="form-label">Email</label>
+          <input type="email" id="login-email" class="form-input" placeholder="seu@email.com" required>
+        </div>
+        <div class="form-group">
+          <label class="form-label">Senha</label>
+          <div class="password-input-container">
+            <input type="password" id="login-password" class="form-input" placeholder="••••••••" required>
+            <button type="button" class="password-toggle" id="login-toggle" aria-label="Mostrar senha">
+              👁️
+            </button>
+          </div>
+        </div>
+        <button id="login-btn" class="btn btn-primary">Entrar</button>
+        <div class="divider">
+          <span class="divider-text">ou</span>
+        </div>
+        <button id="show-register" class="btn btn-secondary">Criar conta</button>
+        <div style="margin-top: 16px; text-align: center;">
+          <button id="skip-auth" class="link" style="background: none; border: none; color: #6b7280; font-size: 12px; cursor: pointer; text-decoration: underline;">
+            Pular autenticação (desenvolvimento)
+          </button>
+        </div>
+      </div>
+
+      <!-- Register Form -->
+      <div id="register-form" style="display: none;">
+        <div class="form-group">
+          <label class="form-label">Nome Completo</label>
+          <input type="text" id="register-name" class="form-input" placeholder="João Silva" required>
+        </div>
+        <div class="form-group">
+          <label class="form-label">Email</label>
+          <input type="email" id="register-email" class="form-input" placeholder="joao@email.com" required>
+        </div>
+        <div class="form-group">
+          <label class="form-label">Cargo</label>
+          <input type="text" id="register-role" class="form-input" placeholder="Gerente de RH" required>
+        </div>
+        <div class="form-group">
+          <label class="form-label">Empresa</label>
+          <input type="text" id="register-company" class="form-input" placeholder="Nome da Empresa" required>
+        </div>
+        <div class="form-group">
+          <label class="form-label">Senha</label>
+          <div class="password-input-container">
+            <input type="password" id="register-password" class="form-input" placeholder="••••••••" required>
+            <button type="button" class="password-toggle" id="register-toggle" aria-label="Mostrar senha">
+              👁️
+            </button>
+          </div>
+        </div>
+        <div class="form-group">
+          <label class="form-label">Confirmar Senha</label>
+          <div class="password-input-container">
+            <input type="password" id="register-confirm" class="form-input" placeholder="••••••••" required>
+            <button type="button" class="password-toggle" id="register-confirm-toggle" aria-label="Mostrar senha">
+              👁️
+            </button>
+          </div>
+        </div>
+        <button id="register-btn" class="btn btn-primary">Criar conta</button>
+        <div class="divider">
+          <span class="divider-text">ou</span>
+        </div>
+        <button id="show-login" class="btn btn-secondary">Já tenho conta</button>
+      </div>
+
+      <!-- Email Verification -->
+      <div id="verify-form" style="display: none;">
+        <h3 style="margin-bottom: 16px; color: #374151;">Verifique seu email</h3>
+        <p style="color: #6b7280; font-size: 14px; margin-bottom: 24px;">
+          Enviamos um código de verificação para seu email. Digite o código abaixo:
+        </p>
+        <div class="form-group">
+          <label class="form-label">Código de Verificação</label>
+          <input type="text" id="verify-code" class="form-input" placeholder="123456" maxlength="6" required>
+        </div>
+        <button id="verify-btn" class="btn btn-primary">Verificar</button>
+        <div style="margin-top: 16px;">
+          <a href="#" id="resend-code" class="link">Reenviar código</a>
+        </div>
+      </div>
+
+      <!-- Alert Messages -->
+      <div id="alert" style="display: none;"></div>
+    </div>
+  </div>
+
+  <script>
+    // Password toggle functionality
+    function togglePassword(inputId, buttonId) {
+      const input = document.getElementById(inputId);
+      const button = document.getElementById(buttonId);
+
+      button.addEventListener('click', () => {
+        const isPassword = input.type === 'password';
+        input.type = isPassword ? 'text' : 'password';
+        button.textContent = isPassword ? '🙈' : '👁️';
+        button.setAttribute('aria-label', isPassword ? 'Ocultar senha' : 'Mostrar senha');
+      });
+    }
+
+    // Initialize password toggles
+    togglePassword('login-password', 'login-toggle');
+    togglePassword('register-password', 'register-toggle');
+    togglePassword('register-confirm', 'register-confirm-toggle');
+
+    // Form switching
+    document.getElementById('show-register').addEventListener('click', () => {
+      document.getElementById('login-form').style.display = 'none';
+      document.getElementById('register-form').style.display = 'block';
+      document.getElementById('verify-form').style.display = 'none';
+    });
+
+    document.getElementById('show-login').addEventListener('click', () => {
+      document.getElementById('login-form').style.display = 'block';
+      document.getElementById('register-form').style.display = 'none';
+      document.getElementById('verify-form').style.display = 'none';
+    });
+
+    // Skip authentication (development mode)
+    document.getElementById('skip-auth').addEventListener('click', () => {
+      localStorage.setItem('skipAuth', 'true');
+      window.location.href = 'gestao_desempenho_v3.html';
+    });
+
+    // Alert function
+    function showAlert(message, type = 'error') {
+      const alert = document.getElementById('alert');
+      alert.className = `alert alert-${type}`;
+      alert.textContent = message;
+      alert.style.display = 'block';
+      setTimeout(() => alert.style.display = 'none', 5000);
+    }
+
+    // Login
+    document.getElementById('login-btn').addEventListener('click', async () => {
+      const email = document.getElementById('login-email').value;
+      const password = document.getElementById('login-password').value;
+
+      if (!email || !password) {
+        showAlert('Preencha todos os campos');
+        return;
+      }
+
+      const btn = document.getElementById('login-btn');
+      btn.innerHTML = '<div class="loading"></div>Entrando...';
+      btn.disabled = true;
+
+      try {
+        const response = await fetch('http://localhost:3001/api/auth/login', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ email, password })
+        });
+
+        const data = await response.json();
+
+        if (response.ok) {
+          localStorage.setItem('token', data.token);
+          localStorage.setItem('user', JSON.stringify(data.user));
+          window.location.href = 'gestao_desempenho_v3.html';
+        } else {
+          showAlert(data.message || 'Erro no login');
+        }
+      } catch (error) {
+        showAlert('Erro de conexão. Verifique se o servidor está rodando.');
+      } finally {
+        btn.innerHTML = 'Entrar';
+        btn.disabled = false;
+      }
+    });
+
+    // Register
+    document.getElementById('register-btn').addEventListener('click', async () => {
+      const name = document.getElementById('register-name').value;
+      const email = document.getElementById('register-email').value;
+      const role = document.getElementById('register-role').value;
+      const company = document.getElementById('register-company').value;
+      const password = document.getElementById('register-password').value;
+      const confirm = document.getElementById('register-confirm').value;
+
+      if (!name || !email || !role || !company || !password || !confirm) {
+        showAlert('Preencha todos os campos');
+        return;
+      }
+
+      if (password !== confirm) {
+        showAlert('As senhas não coincidem');
+        return;
+      }
+
+      if (password.length < 6) {
+        showAlert('A senha deve ter pelo menos 6 caracteres');
+        return;
+      }
+
+      const btn = document.getElementById('register-btn');
+      btn.innerHTML = '<div class="loading"></div>Criando...';
+      btn.disabled = true;
+
+      try {
+        const response = await fetch('http://localhost:3001/api/auth/register', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ name, email, role, company, password })
+        });
+
+        const data = await response.json();
+
+        if (response.ok) {
+          document.getElementById('register-form').style.display = 'none';
+          document.getElementById('verify-form').style.display = 'block';
+          showAlert('Código de verificação enviado para seu email!', 'success');
+        } else {
+          showAlert(data.message || 'Erro no cadastro');
+        }
+      } catch (error) {
+        showAlert('Erro de conexão. Verifique se o servidor está rodando.');
+      } finally {
+        btn.innerHTML = 'Criar conta';
+        btn.disabled = false;
+      }
+    });
+
+    // Verify Email
+    document.getElementById('verify-btn').addEventListener('click', async () => {
+      const code = document.getElementById('verify-code').value;
+      const email = document.getElementById('register-email').value;
+
+      if (!code || code.length !== 6) {
+        showAlert('Digite o código de 6 dígitos');
+        return;
+      }
+
+      const btn = document.getElementById('verify-btn');
+      btn.innerHTML = '<div class="loading"></div>Verificando...';
+      btn.disabled = true;
+
+      try {
+        const response = await fetch('http://localhost:3001/api/auth/verify', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ email, code })
+        });
+
+        const data = await response.json();
+
+        if (response.ok) {
+          showAlert('Email verificado com sucesso! Você pode fazer login agora.', 'success');
+          setTimeout(() => {
+            document.getElementById('login-form').style.display = 'block';
+            document.getElementById('verify-form').style.display = 'none';
+          }, 2000);
+        } else {
+          showAlert(data.message || 'Código inválido');
+        }
+      } catch (error) {
+        showAlert('Erro de conexão');
+      } finally {
+        btn.innerHTML = 'Verificar';
+        btn.disabled = false;
+      }
+    });
+
+    // Resend code
+    document.getElementById('resend-code').addEventListener('click', async (e) => {
+      e.preventDefault();
+      const email = document.getElementById('register-email').value;
+
+      try {
+        const response = await fetch('http://localhost:3001/api/auth/resend', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ email })
+        });
+
+        if (response.ok) {
+          showAlert('Novo código enviado!', 'success');
+        } else {
+          showAlert('Erro ao reenviar código');
+        }
+      } catch (error) {
+        showAlert('Erro de conexão');
+      }
+    });
+
+    // Check if user is already logged in
+    const token = localStorage.getItem('token');
+    if (token) {
+      window.location.href = 'gestao_desempenho_v3.html';
+    }
+  </script>
+</body>
+</html>
