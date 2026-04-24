@@ -177,7 +177,7 @@ function App(){
     try{
       const softSkillsStr=SS.map((s,i)=>`${s}: ${MAT[col.softSkills[i]]}`).join(", ");
       const hardSkillsStr=HS.map((s,i)=>`${s}: ${MAT[col.hardSkills[i]]}`).join(", ");
-      const res=await fetch("http://localhost:3001/api/gerar-pdi",{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({nome:col.nome,cargo:col.cargo,area:col.area,softSkills:softSkillsStr,hardSkills:hardSkillsStr,media:avg(col)})});
+      const res=await fetch("/api/gerar-pdi",{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({nome:col.nome,cargo:col.cargo,area:col.area,softSkills:softSkillsStr,hardSkills:hardSkillsStr,media:avg(col)})});
       if(!res.ok){throw new Error(`Servidor não está rodando. Execute: npm start\nErro: ${res.status}`);}
       const data=await res.json();
       setAiSug(data.sugestoes||[]);
