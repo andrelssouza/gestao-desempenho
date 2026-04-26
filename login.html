@@ -4,124 +4,81 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Gestão de Desempenho - Login</title>
-  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
   <style>
     * { margin: 0; padding: 0; box-sizing: border-box; }
     html, body { width: 100%; height: 100%; font-family: 'Inter', sans-serif; background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); overflow: hidden; }
     .auth-container { display: flex; justify-content: center; align-items: center; height: 100vh; padding: 20px; }
-    .auth-card { background: white; border-radius: 16px; box-shadow: 0 20px 40px rgba(0,0,0,0.1); padding: 40px; width: 100%; max-width: 400px; text-align: center; }
-    .logo { font-size: 28px; font-weight: 700; color: #6d5ae6; margin-bottom: 8px; }
-    .subtitle { color: #6b7280; margin-bottom: 32px; font-size: 14px; }
-    .form-group { margin-bottom: 20px; text-align: left; }
-    .form-label { display: block; font-size: 14px; font-weight: 500; color: #374151; margin-bottom: 6px; }
-    .form-input { width: 100%; padding: 12px 16px; border: 1px solid #d1d5db; border-radius: 8px; font-size: 16px; transition: border-color 0.2s; }
-    .form-input:focus { outline: none; border-color: #6d5ae6; box-shadow: 0 0 0 3px rgba(109, 90, 230, 0.1); }
-    .btn { width: 100%; padding: 12px 16px; border: none; border-radius: 8px; font-size: 16px; font-weight: 500; cursor: pointer; transition: all 0.2s; margin-bottom: 16px; }
+    .auth-card { background: white; border-radius: 16px; padding: 40px; width: 100%; max-width: 400px; text-align: center; box-shadow: 0 20px 40px rgba(0,0,0,0.1); }
+    .logo { font-size: 24px; font-weight: 700; color: #6d5ae6; margin-bottom: 24px; }
+    .form-group { margin-bottom: 16px; text-align: left; }
+    .form-label { display: block; font-size: 13px; font-weight: 500; color: #374151; margin-bottom: 6px; }
+    .form-input { width: 100%; padding: 10px 14px; border: 1px solid #d1d5db; border-radius: 8px; font-size: 14px; }
+    .btn { width: 100%; padding: 12px; border: none; border-radius: 8px; font-size: 15px; font-weight: 600; cursor: pointer; transition: 0.2s; }
     .btn-primary { background: #6d5ae6; color: white; }
-    .btn-primary:hover { background: #5b4fc9; }
-    .btn-secondary { background: #f3f4f6; color: #374151; }
-    .btn-secondary:hover { background: #e5e7eb; }
-    .divider { margin: 24px 0; position: relative; text-align: center; }
-    .divider::before { content: ''; position: absolute; top: 50%; left: 0; right: 0; height: 1px; background: #e5e7eb; }
-    .divider-text { background: white; padding: 0 16px; font-size: 14px; color: #6b7280; position: relative; z-index: 1; }
-    .link { color: #6d5ae6; text-decoration: none; font-size: 14px; cursor: pointer; }
-    .alert { padding: 12px 16px; border-radius: 8px; margin-bottom: 16px; font-size: 14px; }
+    .alert { padding: 10px; border-radius: 6px; margin-bottom: 16px; font-size: 13px; display: none; }
     .alert-error { background: #fef2f2; color: #dc2626; border: 1px solid #fecaca; }
-    .alert-success { background: #f0fdf4; color: #16a34a; border: 1px solid #bbf7d0; }
   </style>
 </head>
 <body>
   <div class="auth-container">
     <div class="auth-card">
       <div class="logo">Gestão de Desempenho</div>
-      <div class="subtitle">Sistema de Gestão de Performance</div>
-
-      <div id="login-form">
-        <div class="form-group">
-          <label class="form-label">Email</label>
-          <input type="email" id="login-email" class="form-input" placeholder="seu@email.com" required>
-        </div>
-        <div class="form-group">
-          <label class="form-label">Senha</label>
-          <input type="password" id="login-password" class="form-input" placeholder="••••••••" required>
-        </div>
-        <button id="login-btn" class="btn btn-primary">Entrar</button>
-        <div class="divider"><span class="divider-text">ou</span></div>
-        <button id="show-register" class="btn btn-secondary">Criar conta</button>
+      <div id="alert" class="alert alert-error"></div>
+      <div class="form-group">
+        <label class="form-label">E-mail</label>
+        <input type="email" id="email" class="form-input" placeholder="seu@email.com">
       </div>
-
-      <div id="register-form" style="display: none;">
-        <div class="form-group">
-          <label class="form-label">Email</label>
-          <input type="email" id="register-email" class="form-input" placeholder="joao@email.com" required>
-        </div>
-        <div class="form-group">
-          <label class="form-label">Senha</label>
-          <input type="password" id="register-password" class="form-input" placeholder="••••••••" required>
-        </div>
-        <button id="register-btn" class="btn btn-primary">Criar conta</button>
-        <div class="divider"><span class="divider-text">ou</span></div>
-        <button id="show-login" class="btn btn-secondary">Já tenho conta</button>
+      <div class="form-group">
+        <label class="form-label">Senha</label>
+        <input type="password" id="password" class="form-input" placeholder="••••••••">
       </div>
-
-      <div id="alert" style="display: none;"></div>
+      <button id="login-btn" class="btn btn-primary">Entrar ou Criar Conta</button>
+      <p style="margin-top: 16px; font-size: 12px; color: #6b7280;">Os dados serão salvos no seu e-mail.</p>
     </div>
   </div>
 
   <script>
-    const showAlert = (msg, type = 'error') => {
-      const alert = document.getElementById('alert');
-      alert.className = `alert alert-${type}`;
-      alert.textContent = msg;
-      alert.style.display = 'block';
-    };
+    const btn = document.getElementById('login-btn');
+    const alertBox = document.getElementById('alert');
 
-    document.getElementById('show-register').onclick = () => {
-      document.getElementById('login-form').style.display = 'none';
-      document.getElementById('register-form').style.display = 'block';
-    };
+    btn.onclick = async () => {
+      const email = document.getElementById('email').value;
+      const password = document.getElementById('password').value;
 
-    document.getElementById('show-login').onclick = () => {
-      document.getElementById('login-form').style.display = 'block';
-      document.getElementById('register-form').style.display = 'none';
-    };
+      if(!email || !password) {
+        alertBox.textContent = "Preencha todos os campos";
+        alertBox.style.display = "block";
+        return;
+      }
 
-    // CORREÇÃO: Removido 'http://localhost:3001' para funcionar na Vercel
-    document.getElementById('login-btn').onclick = async () => {
-      const email = document.getElementById('login-email').value;
-      const password = document.getElementById('login-password').value;
+      btn.disabled = true;
+      btn.textContent = "Carregando...";
+
       try {
         const res = await fetch('/api/auth/login', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({ email, password })
         });
-        const data = await res.json();
-        if (res.ok) {
-          localStorage.setItem('user', JSON.stringify(data.user));
-          localStorage.setItem('token', data.token);
-          window.location.href = 'gestao_desempenho_v3.html';
-        } else { showAlert(data.message || 'Erro no login'); }
-      } catch (e) { showAlert('Erro de conexão com o servidor.'); }
-    };
 
-    document.getElementById('register-btn').onclick = async () => {
-      const email = document.getElementById('register-email').value;
-      const password = document.getElementById('register-password').value;
-      try {
-        // CORREÇÃO: Usando rota relativa /api/auth/login para registrar automaticamente no Supabase
-        const res = await fetch('/api/auth/login', {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ email, password })
-        });
         const data = await res.json();
+
         if (res.ok) {
           localStorage.setItem('user', JSON.stringify(data.user));
           localStorage.setItem('token', data.token);
           window.location.href = 'gestao_desempenho_v3.html';
-        } else { showAlert('Erro ao criar conta.'); }
-      } catch (e) { showAlert('Erro de conexão com o servidor.'); }
+        } else {
+          alertBox.textContent = data.error || "Erro ao entrar";
+          alertBox.style.display = "block";
+        }
+      } catch (e) {
+        alertBox.textContent = "Erro de conexão com o servidor";
+        alertBox.style.display = "block";
+      } finally {
+        btn.disabled = false;
+        btn.textContent = "Entrar ou Criar Conta";
+      }
     };
   </script>
 </body>
