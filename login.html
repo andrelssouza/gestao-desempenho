@@ -15,16 +15,15 @@
     .form-group { margin-bottom: 20px; text-align: left; }
     .form-label { display: block; font-size: 14px; font-weight: 500; color: #374151; margin-bottom: 6px; }
     .form-input { width: 100%; padding: 12px 16px; border: 1px solid #d1d5db; border-radius: 8px; font-size: 16px; transition: border-color 0.2s; }
-    .form-input:focus { outline: none; border-color: #6d5ae6; box-shadow: 0 0 0 3px rgba(109, 90, 230, 0.1); }
+    .form-input:focus { outline: none; border-color: #6d5ae6; }
     .btn { width: 100%; padding: 12px 16px; border: none; border-radius: 8px; font-size: 16px; font-weight: 500; cursor: pointer; transition: all 0.2s; margin-bottom: 16px; }
     .btn-primary { background: #6d5ae6; color: white; }
     .btn-secondary { background: #f3f4f6; color: #374151; }
     .divider { margin: 24px 0; position: relative; text-align: center; }
     .divider::before { content: ''; position: absolute; top: 50%; left: 0; right: 0; height: 1px; background: #e5e7eb; }
     .divider-text { background: white; padding: 0 16px; font-size: 14px; color: #6b7280; position: relative; z-index: 1; }
-    .link { color: #6d5ae6; text-decoration: none; font-size: 14px; cursor: pointer; background: none; border: none; }
-    .alert { padding: 12px 16px; border-radius: 8px; margin-bottom: 16px; font-size: 14px; display: none; }
-    .alert-error { background: #fef2f2; color: #dc2626; border: 1px solid #fecaca; }
+    .link-btn { background: none; border: none; color: #6d5ae6; text-decoration: underline; font-size: 12px; cursor: pointer; margin-top: 10px; }
+    .alert { padding: 12px 16px; border-radius: 8px; margin-bottom: 16px; font-size: 14px; display: none; background: #fef2f2; color: #dc2626; border: 1px solid #fecaca; }
   </style>
 </head>
 <body>
@@ -33,28 +32,101 @@
       <div class="logo">Gestão de Desempenho</div>
       <div class="subtitle">Sistema de Gestão de Performance</div>
 
-      <div id="alert" class="alert alert-error"></div>
+      <div id="alert-box" class="alert"></div>
 
-      <div id="login-form">
+      <div id="box-login">
         <div class="form-group">
           <label class="form-label">Email</label>
-          <input type="email" id="login-email" class="form-input" placeholder="seu@email.com">
+          <input type="email" id="l-email" class="form-input" placeholder="seu@email.com">
         </div>
         <div class="form-group">
           <label class="form-label">Senha</label>
-          <input type="password" id="login-password" class="form-input" placeholder="••••••••">
+          <input type="password" id="l-pass" class="form-input" placeholder="••••••••">
         </div>
-        <button id="login-btn" class="btn btn-primary">Entrar</button>
+        <button id="btn-entrar" class="btn btn-primary">Entrar</button>
         <div class="divider"><span class="divider-text">ou</span></div>
-        <button id="show-register" class="btn btn-secondary">Criar conta</button>
-        <div style="margin-top: 16px;">
-          <button id="skip-auth" class="link" style="text-decoration: underline; color: #6b7280; font-size: 12px;">
-            Pular autenticação (visualizar projeto)
-          </button>
-        </div>
+        <button id="go-to-reg" class="btn btn-secondary">Criar conta</button>
+        <button id="btn-skip" class="link-btn" style="color: #6b7280;">Pular autenticação (visualizar)</button>
       </div>
 
-      <div id="register-form" style="display: none;">
+      <div id="box-register" style="display: none;">
         <div class="form-group">
           <label class="form-label">Email</label>
-          <input type="email" id="register-email" class="form-input" placeholder="joao@email.com
+          <input type="email" id="r-email" class="form-input" placeholder="seu@email.com">
+        </div>
+        <div class="form-group">
+          <label class="form-label">Senha</label>
+          <input type="password" id="r-pass" class="form-input" placeholder="Mínimo 6 caracteres">
+        </div>
+        <button id="btn-criar" class="btn btn-primary">Criar minha conta</button>
+        <div class="divider"><span class="divider-text">ou</span></div>
+        <button id="go-to-log" class="btn btn-secondary">Já tenho conta</button>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    const boxLogin = document.getElementById('box-login');
+    const boxReg = document.getElementById('box-register');
+    const alertBox = document.getElementById('alert-box');
+
+    function showMsg(txt) {
+      alertBox.textContent = txt;
+      alertBox.style.display = 'block';
+    }
+
+    // Alternar telas
+    document.getElementById('go-to-reg').onclick = () => {
+      boxLogin.style.display = 'none';
+      boxReg.style.display = 'block';
+      alertBox.style.display = 'none';
+    };
+
+    document.getElementById('go-to-log').onclick = () => {
+      boxReg.style.display = 'none';
+      boxLogin.style.display = 'block';
+      alertBox.style.display = 'none';
+    };
+
+    // Pular
+    document.getElementById('btn-skip').onclick = () => {
+      localStorage.setItem('skipAuth', 'true');
+      localStorage.setItem('user', JSON.stringify({ email: 'convidado@teste.com' }));
+      window.location.href = 'gestao_desempenho_v3.html';
+    };
+
+    // Ação de Autenticação
+    async function enviar(email, password) {
+      if(!email || !password) return showMsg("Preencha os campos!");
+      
+      try {
+        const res = await fetch('/api/auth/login', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ email, password })
+        });
+        const data = await res.json();
+
+        if(res.ok) {
+          localStorage.setItem('user', JSON.stringify(data.user));
+          localStorage.setItem('token', data.token);
+          localStorage.removeItem('skipAuth');
+          window.location.href = 'gestao_desempenho_v3.html';
+        } else {
+          showMsg(data.error || "Erro ao entrar");
+        }
+      } catch(e) {
+        showMsg("Erro de conexão com o servidor");
+      }
+    }
+
+    document.getElementById('btn-entrar').onclick = () => {
+      enviar(document.getElementById('l-email').value, document.getElementById('l-pass').value);
+    };
+
+    document.getElementById('btn-criar').onclick = () => {
+      enviar(document.getElementById('r-email').value, document.getElementById('r-pass').value);
+    };
+  </script>
+</body>
+</html>
