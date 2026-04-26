@@ -48,6 +48,10 @@
         <button id="login-btn" class="btn btn-primary">Entrar</button>
         <div class="divider"><span class="divider-text">ou</span></div>
         <button id="show-register" class="btn btn-secondary">Criar conta</button>
+        
+        <div style="margin-top: 16px;">
+          <a href="gestao_desempenho_v3.html" class="link" onclick="localStorage.setItem('skipAuth', 'true')">Pular autenticação (visualizar projeto)</a>
+        </div>
       </div>
 
       <div id="register-form" style="display: none;">
@@ -86,42 +90,53 @@
       document.getElementById('register-form').style.display = 'none';
     };
 
-    // CORREÇÃO: Removido 'http://localhost:3001' para funcionar na Vercel
     document.getElementById('login-btn').onclick = async () => {
       const email = document.getElementById('login-email').value;
       const password = document.getElementById('login-password').value;
+
       try {
-        const res = await fetch('/api/auth/login', {
+        const res = await fetch('http://localhost:3001/api/auth/login', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({ email, password })
         });
+
         const data = await res.json();
+
         if (res.ok) {
           localStorage.setItem('user', JSON.stringify(data.user));
           localStorage.setItem('token', data.token);
           window.location.href = 'gestao_desempenho_v3.html';
-        } else { showAlert(data.message || 'Erro no login'); }
-      } catch (e) { showAlert('Erro de conexão com o servidor.'); }
+        } else {
+          showAlert(data.message || 'Erro no login');
+        }
+      } catch (e) {
+        showAlert('Erro de conexão. Verifique se o servidor está rodando.');
+      }
     };
 
     document.getElementById('register-btn').onclick = async () => {
       const email = document.getElementById('register-email').value;
       const password = document.getElementById('register-password').value;
+
       try {
-        // CORREÇÃO: Usando rota relativa /api/auth/login para registrar automaticamente no Supabase
-        const res = await fetch('/api/auth/login', {
+        const res = await fetch('http://localhost:3001/api/auth/register', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({ email, password })
         });
+
         const data = await res.json();
+
         if (res.ok) {
-          localStorage.setItem('user', JSON.stringify(data.user));
-          localStorage.setItem('token', data.token);
-          window.location.href = 'gestao_desempenho_v3.html';
-        } else { showAlert('Erro ao criar conta.'); }
-      } catch (e) { showAlert('Erro de conexão com o servidor.'); }
+          showAlert('Conta criada com sucesso! Faça login.', 'success');
+          document.getElementById('show-login').click();
+        } else {
+          showAlert(data.message || 'Erro no registro');
+        }
+      } catch (e) {
+        showAlert('Erro de conexão. Verifique se o servidor está rodando.');
+      }
     };
   </script>
 </body>
