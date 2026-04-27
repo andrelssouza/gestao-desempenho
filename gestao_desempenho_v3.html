@@ -31,6 +31,7 @@
 <script src="https://cdnjs.cloudflare.com/ajax/libs/react/18.2.0/umd/react.production.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/react-dom/18.2.0/umd/react-dom.production.min.js"></script>
 <script src="https://unpkg.com/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
 <script>
 const {useState}=React,cr=React.createElement;
 const {useMemo}=React;
@@ -70,28 +71,32 @@ const NT_L=[["#BA7517","#0F6E56","#fff"],["#993C1D","#185FA5","#3C3489"],["#A32D
 const NC_D=[["#412402","#04342C","#26215C"],["#4A1B0C","#042C53","#26215C"],["#501313","#173404","#04342C"]];
 const NT_D=[["#FAC775","#9FE1CB","#CECBF6"],["#F5C4B3","#B5D4F4","#AFA9EC"],["#F7C1C1","#C0DD97","#9FE1CB"]];
 const colab0=[
-  {id:1,nome:"Ana Souza",cargo:"Analista de RH",area:"RH",avatar:"AS",softSkills:[3,2,2,3,4,2],hardSkills:[3,2,4,3,2,3],
+  {id:1,nome:"Ana Souza",cargo:"Analista de RH",area:"RH",avatar:"AS",softSkills:[7.5,5,5,7.5,10,5],hardSkills:[7.5,5,10,7.5,5,7.5],
    metas:[{id:1,titulo:"Onboarding digital",okr:"Reduzir integração 30%",progresso:70,prazo:"2025-06-30"},{id:2,titulo:"Cert. People Analytics",okr:"Concluir até Q2",progresso:40,prazo:"2025-05-31"}],
    feedbacks:[{id:1,tipo:"positivo",texto:"Excelente comunicação com novos colaboradores.",data:"2025-03-10",autor:"Carlos Lima"},{id:2,tipo:"desenvolvimento",texto:"Melhorar organização dos processos de triagem.",data:"2025-02-20",autor:"Carlos Lima"}],
    pdi:[{id:1,competencia:"Liderança",acao:"Curso de liderança situacional",prazo:"2025-07-01",status:"em andamento"},{id:2,competencia:"Dados",acao:"Treinamento Power BI",prazo:"2025-06-01",status:"pendente"}],
-   historico:[{periodo:"Q4 2024",mediaGeral:2.8},{periodo:"Q1 2025",mediaGeral:3.1}],potencial:1,desempenho:1},
-  {id:2,nome:"Bruno Melo",cargo:"Dev Backend",area:"TI",avatar:"BM",softSkills:[2,3,1,2,4,2],hardSkills:[4,3,4,4,3,4],
+   historico:[{periodo:"Q4 2024",mediaGeral:7.0},{periodo:"Q1 2025",mediaGeral:7.8}],potencial:1,desempenho:1,
+   skillsHistory:[{date:"2024-01-01",softSkills:[2.5,2.5,2.5,2.5,2.5,2.5],hardSkills:[2.5,2.5,2.5,2.5,2.5,2.5]},{date:"2025-01-01",softSkills:[7.5,5,5,7.5,10,5],hardSkills:[7.5,5,10,7.5,5,7.5]}],
+   nineboxHistory:[{date:"2024-01-01",potencial:0,desempenho:0},{date:"2025-01-01",potencial:1,desempenho:1}]},
+  {id:2,nome:"Bruno Melo",cargo:"Dev Backend",area:"TI",avatar:"BM",softSkills:[5,7.5,2.5,5,10,5],hardSkills:[10,7.5,10,10,7.5,10],
    metas:[{id:1,titulo:"Migrar API microsserviços",okr:"Performance +50%",progresso:55,prazo:"2025-08-31"},{id:2,titulo:"Reduzir bugs produção",okr:"0 incidentes/mês",progresso:80,prazo:"2025-12-31"}],
    feedbacks:[{id:1,tipo:"positivo",texto:"Entrega consistente e código de alta qualidade.",data:"2025-03-15",autor:"Fernanda Torres"},{id:2,tipo:"desenvolvimento",texto:"Melhorar documentação técnica das APIs.",data:"2025-01-30",autor:"Fernanda Torres"}],
    pdi:[{id:1,competencia:"Comunicação",acao:"Workshop de apresentação técnica",prazo:"2025-06-15",status:"pendente"},{id:2,competencia:"Liderança",acao:"Mentoria de estagiários",prazo:"2025-07-01",status:"em andamento"}],
-   historico:[{periodo:"Q4 2024",mediaGeral:3.2},{periodo:"Q1 2025",mediaGeral:3.5}],potencial:2,desempenho:1},
-  {id:3,nome:"Carla Dias",cargo:"Gerente Comercial",area:"Vendas",avatar:"CD",softSkills:[4,4,4,3,4,4],hardSkills:[3,4,3,3,4,4],
+   historico:[{periodo:"Q4 2024",mediaGeral:8.0},{periodo:"Q1 2025",mediaGeral:8.8}],potencial:2,desempenho:1,
+   skillsHistory:[],nineboxHistory:[]},
+  {id:3,nome:"Carla Dias",cargo:"Gerente Comercial",area:"Vendas",avatar:"CD",softSkills:[10,10,10,7.5,10,10],hardSkills:[7.5,10,7.5,7.5,10,10],
    metas:[{id:1,titulo:"Meta vendas Q2",okr:"R$2M novos contratos",progresso:90,prazo:"2025-06-30"},{id:2,titulo:"Playbook de vendas",okr:"10 processos doc.",progresso:30,prazo:"2025-07-31"}],
    feedbacks:[{id:1,tipo:"positivo",texto:"Liderança excepcional da equipe comercial.",data:"2025-03-18",autor:"Ricardo Nunes"},{id:2,tipo:"positivo",texto:"Superou meta do trimestre em 15%.",data:"2025-02-28",autor:"Ricardo Nunes"}],
    pdi:[{id:1,competencia:"Gestão projetos",acao:"Certificação PMP",prazo:"2025-10-01",status:"pendente"},{id:2,competencia:"Dados",acao:"Curso análise de funil",prazo:"2025-06-01",status:"em andamento"}],
-   historico:[{periodo:"Q4 2024",mediaGeral:3.8},{periodo:"Q1 2025",mediaGeral:4.1}],potencial:2,desempenho:2}
+   historico:[{periodo:"Q4 2024",mediaGeral:9.5},{periodo:"Q1 2025",mediaGeral:10.3}],potencial:2,desempenho:2,
+   skillsHistory:[],nineboxHistory:[]}
 ];
 const med=a=>a.reduce((x,y)=>x+y,0)/a.length;
 const avg=c=>((med(c.softSkills)+med(c.hardSkills))/2).toFixed(1);
 
 function RadarSingle({skills,labels,cor,fill,dark}){
   const cx=100,cy=95,r=62,n=skills.length;
-  const pt=(vals)=>vals.map((_,i)=>{const a=(Math.PI*2*i/n)-Math.PI/2,v=(vals[i]/4)*r;return[cx+v*Math.cos(a),cy+v*Math.sin(a)];});
+  const pt=(vals)=>vals.map((_,i)=>{const a=(Math.PI*2*i/n)-Math.PI/2,v=(vals[i]/10)*r;return[cx+v*Math.cos(a),cy+v*Math.sin(a)];});
   const poly=p=>p.map(x=>x.join(",")).join(" ");
   const grid=f=>Array.from({length:n},(_,i)=>{const a=(Math.PI*2*i/n)-Math.PI/2;return[cx+r*f*Math.cos(a),cy+r*f*Math.sin(a)];});
   const lp=Array.from({length:n},(_,i)=>{const a=(Math.PI*2*i/n)-Math.PI/2;return[cx+(r+18)*Math.cos(a),cy+(r+18)*Math.sin(a)];});
@@ -105,7 +110,7 @@ function RadarSingle({skills,labels,cor,fill,dark}){
     ...lp.map((p,i)=>cr("text",{key:"l"+i,x:p[0],y:p[1],textAnchor:"middle",dominantBaseline:"middle",fontSize:8.5,fill:tc},labels[i])),
     ...pts.map((p,i)=>{
       const ox=p[0]>cx+5?7:p[0]<cx-5?-7:0,oy=p[1]>cy+5?9:p[1]<cy-5?-9:0;
-      return cr("text",{key:"v"+i,x:p[0]+ox,y:p[1]+oy,textAnchor:"middle",fontSize:7.5,fontWeight:"bold",fill:cor},MAT[skills[i]].slice(0,4));
+      return cr("text",{key:"v"+i,x:p[0]+ox,y:p[1]+oy,textAnchor:"middle",fontSize:7.5,fontWeight:"bold",fill:cor},MAT[Math.min(4, Math.floor(skills[i]/2))].slice(0,4));
     })
   );
 }
@@ -123,6 +128,9 @@ function App(){
   const[nFb,setNFb]=useState({tipo:"positivo",texto:"",autor:""});
   const[showMeta,setShowMeta]=useState(false);
   const[nMeta,setNMeta]=useState({titulo:"",okr:"",progresso:0,prazo:""});
+  const[editingInfo,setEditingInfo]=useState(false);
+  const[tempCargo,setTempCargo]=useState("");
+  const[tempArea,setTempArea]=useState("");
   const[showPdi,setShowPdi]=useState(false);
   const[nPdi,setNPdi]=useState({competencia:"",acao:"",prazo:"",status:"pendente"});
   const[aiLoad,setAiLoad]=useState(false);
@@ -135,6 +143,8 @@ function App(){
   const[aiAnalysisLoad,setAiAnalysisLoad]=useState(false);
   const[buscaColaborador,setBuscaColaborador]=useState("");
   const[setorSelecionado,setSetorSelecionado]=useState("");
+  const[showHistory,setShowHistory]=useState(false);
+  const[historyCol,setHistoryCol]=useState(null);
 
   const T=useMemo(()=>({
     bg:dark?"#111827":"#ffffff",bgSec:dark?"#1f2937":"#f3f4f6",bgTer:dark?"#374151":"#e5e7eb",
@@ -148,7 +158,8 @@ function App(){
 
   const col=cols.find(c=>c.id===selId)||(cols.length?cols[0]:null);
 
-  const salvarSk=()=>{setCols(p=>p.map(c=>c.id===selId?{...c,softSkills:tSoft,hardSkills:tHard,historico:[...c.historico,{periodo:"Q2 2025",mediaGeral:parseFloat(((med(tSoft)+med(tHard))/2).toFixed(1))}]}:c));setEditSk(false);};
+  const salvarSk=()=>{setCols(p=>p.map(c=>c.id===selId?{...c,softSkills:tSoft,hardSkills:tHard,historico:[...c.historico,{periodo:"Q2 2025",mediaGeral:parseFloat(((med(tSoft)+med(tHard))/2).toFixed(1))}],
+   skillsHistory:[...c.skillsHistory,{date:new Date().toISOString().slice(0,10),softSkills:tSoft,hardSkills:tHard}]}:c));setEditSk(false);};
   const addFb=()=>{if(!nFb.texto)return;setCols(p=>p.map(c=>c.id===selId?{...c,feedbacks:[{...nFb,id:Date.now(),data:new Date().toISOString().slice(0,10)},...c.feedbacks]}:c));setShowFb(false);setNFb({tipo:"positivo",texto:"",autor:""});};
   const addMeta=()=>{if(!nMeta.titulo)return;setCols(p=>p.map(c=>c.id===selId?{...c,metas:[...c.metas,{...nMeta,id:Date.now(),progresso:parseInt(nMeta.progresso)||0}]}:c));setShowMeta(false);setNMeta({titulo:"",okr:"",progresso:0,prazo:""});};
   const addPdi=()=>{if(!nPdi.acao)return;setCols(p=>p.map(c=>c.id===selId?{...c,pdi:[...c.pdi,{...nPdi,id:Date.now()}]}:c));setShowPdi(false);setNPdi({competencia:"",acao:"",prazo:"",status:"pendente"});};
@@ -159,7 +170,7 @@ function App(){
     setCols(p=>[...p,n]);setSelId(n.id);setNovoC({nome:"",cargo:"",area:""});setShowNC(false);setPg("colaboradores");setAba("visao");
   };
   const excluir=(id)=>{const r=cols.filter(c=>c.id!==id);setCols(r);if(r.length)setSelId(r[0].id);setConfirmDel(null);};
-  const updNB=(id,pot,des)=>setCols(p=>p.map(c=>c.id===id?{...c,potencial:pot,desempenho:des}:c));
+  const updNB=(id,pot,des)=>setCols(p=>p.map(c=>c.id===id?{...c,potencial:pot,desempenho:des,nineboxHistory:[...c.nineboxHistory,{date:new Date().toISOString().slice(0,10),potencial:pot,desempenho:des}]}:c));
   const addSug=s=>{const p={id:Date.now(),competencia:s.competencia,acao:s.acao,prazo:s.prazo||"2025-12-31",status:"pendente"};setCols(prev=>prev.map(c=>c.id===selId?{...c,pdi:[...c.pdi,p]}:c));};
   const gerarIA=async()=>{
     setAiLoad(true);setAiSug(null);
@@ -209,6 +220,134 @@ function App(){
     XLSX.writeFile(wb,`Relatorio_Desempenho_${new Date().toISOString().slice(0,10)}.xlsx`);
   };
 
+  const exportarHistoricoPDF=(colaborador)=>{
+    const {jsPDF}=window.jspdf;
+    const doc=new jsPDF({unit:'mm',format:'a4'});
+    doc.setFont("helvetica","normal");
+    const pageWidth=210; // A4 width in mm
+    const pageHeight=297; // A4 height in mm
+    const marginLeft=20;
+    const marginRight=20;
+    const marginTop=25;
+    const marginBottom=25;
+    const contentWidth=pageWidth-marginLeft-marginRight;
+    let y=marginTop;
+
+    // Título
+    doc.setFontSize(18);
+    doc.setFont("helvetica","bold");
+    doc.text(`Histórico de Desempenho - ${colaborador.nome}`,marginLeft,y);
+    y+=15;
+
+    // Informações Gerais
+    doc.setFontSize(14);
+    doc.setFont("helvetica","bold");
+    doc.text("Informações Gerais",marginLeft,y);
+    y+=10;
+    doc.setFontSize(11);
+    doc.setFont("helvetica","normal");
+    doc.text(`Cargo: ${colaborador.cargo}`,marginLeft,y);
+    y+=7;
+    doc.text(`Área: ${colaborador.area}`,marginLeft,y);
+    y+=7;
+    doc.text(`Média atual: ${avg(colaborador)}/10.0`,marginLeft,y);
+    y+=15;
+
+    // PDI
+    if(colaborador.pdi.length>0){
+      doc.setFontSize(14);
+      doc.setFont("helvetica","bold");
+      doc.text("PDI",marginLeft,y);
+      y+=10;
+      doc.setFontSize(11);
+      doc.setFont("helvetica","normal");
+      colaborador.pdi.forEach(p=>{
+        if(y>pageHeight-marginBottom-10){doc.addPage();y=marginTop;}
+        doc.text(`${p.acao} (${p.competencia}) - ${p.status} - Prazo: ${p.prazo}`,marginLeft,y,{maxWidth:contentWidth});
+        y+=7;
+      });
+      y+=8;
+    }
+
+    // Feedbacks
+    if(colaborador.feedbacks.length>0){
+      doc.setFontSize(14);
+      doc.setFont("helvetica","bold");
+      doc.text("Feedbacks",marginLeft,y);
+      y+=10;
+      doc.setFontSize(11);
+      doc.setFont("helvetica","normal");
+      colaborador.feedbacks.forEach(f=>{
+        if(y>pageHeight-marginBottom-15){doc.addPage();y=marginTop;}
+        doc.text(`${f.data} - ${f.tipo.toUpperCase()} por ${f.autor}: ${f.texto}`,marginLeft,y,{maxWidth:contentWidth});
+        y+=10;
+      });
+      y+=8;
+    }
+
+    // Skills History
+    if(colaborador.skillsHistory.length>0){
+      doc.setFontSize(14);
+      doc.setFont("helvetica","bold");
+      doc.text("Progressão de Skills",marginLeft,y);
+      y+=10;
+      doc.setFontSize(11);
+      doc.setFont("helvetica","normal");
+      colaborador.skillsHistory.slice().reverse().forEach((sh,i,arr)=>{
+        if(y>pageHeight-marginBottom-40){doc.addPage();y=marginTop;}
+        doc.text(sh.date,marginLeft,y);
+        y+=7;
+        const prev=arr[i+1];
+        SS.forEach((s,j)=>{
+          const prevLevel=prev?MAT[prev.softSkills[j]]:"N/A";
+          const currLevel=MAT[sh.softSkills[j]];
+          const change=prevLevel!==currLevel?` (de ${prevLevel} para ${currLevel})`:"";
+          doc.text(`Soft - ${s}: ${currLevel}${change}`,marginLeft+5,y);
+          y+=5;
+        });
+        HS.forEach((s,j)=>{
+          const prevLevel=prev?MAT[prev.hardSkills[j]]:"N/A";
+          const currLevel=MAT[sh.hardSkills[j]];
+          const change=prevLevel!==currLevel?` (de ${prevLevel} para ${currLevel})`:"";
+          doc.text(`Hard - ${s}: ${currLevel}${change}`,marginLeft+5,y);
+          y+=5;
+        });
+        y+=5;
+      });
+      y+=8;
+    }
+
+    // Ninebox History
+    if(colaborador.nineboxHistory.length>0){
+      doc.setFontSize(14);
+      doc.setFont("helvetica","bold");
+      doc.text("Progressão Nine Box",marginLeft,y);
+      y+=10;
+      doc.setFontSize(11);
+      doc.setFont("helvetica","normal");
+      colaborador.nineboxHistory.slice().reverse().forEach((nh,i,arr)=>{
+        if(y>pageHeight-marginBottom-10){doc.addPage();y=marginTop;}
+        const prev=arr[i+1];
+        const currLabel=NL[2-nh.potencial]?.[nh.desempenho]||"Baixo";
+        const prevLabel=prev?NL[2-prev.potencial]?.[prev.desempenho]||"Baixo":"N/A";
+        const change=prevLabel!==currLabel?` (de ${prevLabel} para ${currLabel})`:"";
+        doc.text(`${nh.date}: ${currLabel}${change}`,marginLeft,y);
+        y+=7;
+      });
+    }
+
+    // Rodapé
+    const totalPages=doc.internal.getNumberOfPages();
+    for(let i=1;i<=totalPages;i++){
+      doc.setPage(i);
+      doc.setFontSize(8);
+      doc.setFont("helvetica","normal");
+      doc.text(`Gerado em ${new Date().toLocaleDateString("pt-BR")} - Página ${i} de ${totalPages}`,marginLeft,pageHeight-marginBottom);
+    }
+
+    doc.save(`Historico_${colaborador.nome.replace(/\s+/g,"_")}_${new Date().toISOString().slice(0,10)}.pdf`);
+  };
+
   const navItems=[{id:"colaboradores",l:"Colaboradores"},{id:"ninebox",l:"Nine Box"},{id:"relatorio",l:"Relatório"}];
   const abas=[{id:"visao",l:"Visão Geral"},{id:"skills",l:"Skills"},{id:"metas",l:"Metas"},{id:"feedback",l:"Feedbacks"},{id:"pdi",l:"PDI"},{id:"historico",l:"Histórico"}];
 
@@ -238,7 +377,7 @@ function App(){
     ),
     // KPIs
     cr("div",{style:{display:"grid",gridTemplateColumns:"repeat(auto-fit,minmax(120px,1fr))",gap:10,marginBottom:14}},
-      ...[{l:"Colaboradores",v:cols.length},{l:"Média da equipe",v:(cols.reduce((a,c)=>a+parseFloat(avg(c)),0)/cols.length||0).toFixed(1)+" / 4"},{l:"Metas ativas",v:cols.reduce((a,c)=>a+c.metas.length,0)},{l:"PDIs ativos",v:cols.reduce((a,c)=>a+c.pdi.length,0)},{l:"Stars",v:cols.filter(c=>c.potencial===2&&c.desempenho===2).length}].map(card=>
+      ...(()=>{const filteredCols=setorSelecionado?cols.filter(c=>c.area===setorSelecionado):cols;return [{l:"Colaboradores",v:filteredCols.length},{l:"Média Geral",v:(filteredCols.reduce((a,c)=>a+parseFloat(avg(c)),0)/filteredCols.length||0).toFixed(1)+" / 10"},{l:"Metas ativas",v:filteredCols.reduce((a,c)=>a+c.metas.length,0)},{l:"PDIs ativos",v:filteredCols.reduce((a,c)=>a+c.pdi.length,0)},{l:"Stars",v:filteredCols.filter(c=>c.potencial===2&&c.desempenho===2).length}];})().map(card=>
         cr("div",{key:card.l,style:{background:T.bgSec,borderRadius:8,padding:"10px 14px"}},cr("p",{style:{margin:0,fontSize:11,color:T.textSec}},card.l),cr("p",{style:{margin:0,fontSize:20,fontWeight:500,color:T.text}},card.v))
       )
     ),
@@ -281,8 +420,19 @@ function App(){
         cr(Card,{style:{marginBottom:10}},
           cr("div",{style:{display:"flex",alignItems:"center",gap:12}},
             cr("div",{style:{width:44,height:44,borderRadius:"50%",background:"#6d5ae6",display:"flex",alignItems:"center",justifyContent:"center",fontSize:15,color:"#fff",fontWeight:500}},col.avatar),
-            cr("div",{style:{flex:1}},cr("p",{style:{margin:0,fontWeight:500,fontSize:16,color:T.text}},col.nome),cr("p",{style:{margin:0,fontSize:12,color:T.textSec}},col.cargo+" · "+col.area)),
-            cr("div",{style:{textAlign:"right"}},cr("p",{style:{margin:0,fontSize:22,fontWeight:500,color:"#6d5ae6"}},avg(col)),cr("p",{style:{margin:0,fontSize:11,color:T.textSec}},"média / 4")),
+            cr("div",{style:{flex:1}},
+              cr("p",{style:{margin:0,fontWeight:500,fontSize:16,color:T.text}},col.nome),
+              editingInfo ? cr("div",{style:{display:"flex",gap:8,alignItems:"center",marginTop:4}},
+                cr("input",{type:"text",value:tempCargo,onChange:e=>setTempCargo(e.target.value),placeholder:"Cargo",style:{...inp,fontSize:12,padding:"4px 8px",width:120}}),
+                cr("select",{value:tempArea,onChange:e=>setTempArea(e.target.value),style:{...inp,fontSize:12,padding:"4px 8px",width:100}},
+                  ...Array.from(new Set(cols.map(c=>c.area))).sort().map(a=>cr("option",{key:a,value:a},a))
+                ),
+                cr("button",{onClick:()=>{setCols(p=>p.map(c=>c.id===col.id?{...c,cargo:tempCargo,area:tempArea}:c));setEditingInfo(false);},style:{...bs("#1D9E75","#fff"),fontSize:11,padding:"4px 8px"}},"Salvar"),
+                cr("button",{onClick:()=>setEditingInfo(false),style:{background:"transparent",border:"none",fontSize:12,color:T.textSec,cursor:"pointer"}},"Cancelar")
+              ) : cr("p",{style:{margin:0,fontSize:12,color:T.textSec}},col.cargo+" · "+col.area)
+            ),
+            cr("div",{style:{textAlign:"right"}},cr("p",{style:{margin:0,fontSize:22,fontWeight:500,color:"#6d5ae6"}},avg(col)),cr("p",{style:{margin:0,fontSize:11,color:T.textSec}},"média / 10")),
+            cr("button",{onClick:()=>{setEditingInfo(true);setTempCargo(col.cargo);setTempArea(col.area);},style:{background:dark?"rgba(109,90,230,0.15)":"rgba(109,90,230,0.08)",border:"0.5px solid rgba(109,90,230,0.3)",borderRadius:6,color:"#6d5ae6",fontSize:12,padding:"6px 12px",cursor:"pointer",fontWeight:500,marginRight:8}},"Editar"),
             cr("button",{onClick:()=>setConfirmDel(col),style:{background:dark?"rgba(239,68,68,0.15)":"rgba(220,38,38,0.08)",border:"0.5px solid rgba(220,38,38,0.3)",borderRadius:6,color:"#ef4444",fontSize:12,padding:"6px 12px",cursor:"pointer",fontWeight:500}},"Excluir")
           )
         ),
@@ -436,7 +586,7 @@ function App(){
             })
           ),
           cr("div",{style:{borderTop:`0.5px solid ${T.border}`,paddingTop:10}},
-            ...col.historico.map((h,i)=>cr("div",{key:i,style:{display:"flex",justifyContent:"space-between",padding:"4px 0",fontSize:13}},cr("span",{style:{color:T.textSec}},h.periodo),cr("span",{style:{fontWeight:500,color:T.text}},h.mediaGeral+" / 4")))
+            ...col.historico.map((h,i)=>cr("div",{key:i,style:{display:"flex",justifyContent:"space-between",padding:"4px 0",fontSize:13}},cr("span",{style:{color:T.textSec}},h.periodo),cr("span",{style:{fontWeight:500,color:T.text}},h.mediaGeral+" / 10")))
           )
         )
       )
@@ -455,9 +605,9 @@ function App(){
                 ...["Baixo","Médio","Alto"].map((des,col2)=>{
                   const potIdx=2-row,desIdx=col2,here=cols.filter(c=>c.potencial===potIdx&&c.desempenho===desIdx);
                   const bg=dark?NC_D[row][col2]:NC_L[row][col2],tc=dark?NT_D[row][col2]:NT_L[row][col2];
-                  return cr("div",{key:col2,style:{flex:1,minHeight:82,background:bg,borderRadius:8,padding:"8px",border:`0.5px solid ${T.border}`}},
+                  return cr("div",{key:col2,style:{flex:1,minHeight:82,background:bg,borderRadius:8,padding:"8px",border:`0.5px solid ${T.border}`},onDragOver:(e)=>e.preventDefault(),onDrop:(e)=>{const id=parseInt(e.dataTransfer.getData("text/plain"));setCols(p=>p.map(c=>c.id===id?{...c,potencial:potIdx,desempenho:desIdx}:c));}},
                     cr("p",{style:{margin:"0 0 5px",fontSize:10,fontWeight:500,color:tc}},NL[row][col2]),
-                    ...here.map(c=>cr("div",{key:c.id,style:{background:dark?"rgba(255,255,255,0.1)":"rgba(255,255,255,0.75)",borderRadius:4,padding:"2px 6px",marginBottom:3,fontSize:11,color:dark?"#f9fafb":"#333",fontWeight:500}},c.nome.split(" ")[0]))
+                    ...here.map(c=>cr("div",{key:c.id,draggable:true,onDragStart:(e)=>e.dataTransfer.setData("text/plain",c.id),style:{background:dark?"rgba(255,255,255,0.1)":"rgba(255,255,255,0.75)",borderRadius:4,padding:"2px 6px",marginBottom:3,fontSize:11,color:dark?"#f9fafb":"#333",fontWeight:500,cursor:"grab"}},c.nome.split(" ")[0]))
                   );
                 })
               )),
@@ -490,7 +640,7 @@ function App(){
               const soft=med(c.softSkills).toFixed(1),hard=med(c.hardSkills).toFixed(1);
               const nblabel=NL[2-c.potencial]?.[c.desempenho]||"-",nbbg=(dark?NC_D:NC_L)[2-c.potencial]?.[c.desempenho]||T.bgSec,nbtc=(dark?NT_D:NT_L)[2-c.potencial]?.[c.desempenho]||T.textSec;
               return cr("tr",{key:c.id,style:{borderBottom:`0.5px solid ${T.border}`,background:i%2===0?"transparent":T.bgSec}},
-                cr("td",{style:{padding:"7px 8px",fontWeight:500,color:T.text}},c.nome),
+                cr("td",{style:{padding:"7px 8px",fontWeight:500,color:T.text,cursor:"pointer"},onClick:()=>{setHistoryCol(c);setShowHistory(true);}},c.nome),
                 cr("td",{style:{padding:"7px 8px",color:T.textSec}},c.area),
                 cr("td",{style:{padding:"7px 8px",color:T.textSec,fontSize:12}},c.cargo),
                 cr("td",{style:{padding:"7px 8px",fontWeight:500,color:"#6d5ae6"}},avg(c)),
@@ -511,6 +661,90 @@ function App(){
             cr("div",{style:{display:"flex",justifyContent:"space-between",fontSize:12,marginBottom:3}},cr("span",{style:{fontWeight:500,color:T.text}},area),cr("span",{style:{color:T.textSec}},cs.length+" colaborador"+(cs.length>1?"es":"")+" · média "+(cs.reduce((a,c)=>a+parseFloat(avg(c)),0)/cs.length).toFixed(1))),
             cr("div",{style:{height:6,background:T.bgTer,borderRadius:4,overflow:"hidden"}},cr("div",{style:{height:"100%",width:`${(cs.length/cols.length)*100}%`,background:"#6d5ae6",borderRadius:4}}))
           )
+        )
+      )
+    ),
+
+    // Modal histórico
+    showHistory&&historyCol&&cr("div",{style:{position:"fixed",inset:0,background:"rgba(0,0,0,0.55)",zIndex:200,display:"flex",alignItems:"center",justifyContent:"center",padding:"16px"}},
+      cr("div",{style:{background:T.card,border:`0.5px solid ${T.border}`,borderRadius:12,padding:24,maxWidth:600,width:"100%",maxHeight:"80vh",overflow:"auto"}},
+        cr("div",{style:{display:"flex",justifyContent:"space-between",alignItems:"center",marginBottom:20}},
+          cr("h3",{style:{margin:0,fontSize:18,fontWeight:600,color:T.text}},"Histórico de "+historyCol.nome),
+          cr("div",{style:{display:"flex",gap:8}},
+            cr("button",{onClick:()=>exportarHistoricoPDF(historyCol),style:{...bs("#1D9E75","#fff"),fontSize:12,padding:"6px 12px"}},"📄 Exportar PDF"),
+            cr("button",{onClick:()=>setShowHistory(false),style:{background:"transparent",border:"none",fontSize:20,cursor:"pointer",color:T.textSec}},"×")
+          )
+        ),
+        // General info
+        cr("div",{style:{marginBottom:20}},
+          cr("h4",{style:{margin:"0 0 10px",fontSize:14,fontWeight:500,color:T.text}},"Informações Gerais"),
+          cr("p",{style:{margin:0,fontSize:13,color:T.textSec}},"Cargo: "+historyCol.cargo),
+          cr("p",{style:{margin:0,fontSize:13,color:T.textSec}},"Área: "+historyCol.area),
+          cr("p",{style:{margin:0,fontSize:13,color:T.textSec}},"Média atual: "+avg(historyCol)+"/10.0")
+        ),
+        // PDI
+        cr("div",{style:{marginBottom:20}},
+          cr("h4",{style:{margin:"0 0 10px",fontSize:14,fontWeight:500,color:T.text}},"PDI"),
+          historyCol.pdi.length ? historyCol.pdi.map(p=>cr("div",{key:p.id,style:{marginBottom:8,padding:"8px",background:T.bgSec,borderRadius:6}},
+            cr("p",{style:{margin:0,fontWeight:500,fontSize:13,color:T.text}},p.acao),
+            cr("p",{style:{margin:"2px 0 0",fontSize:12,color:T.textSec}},"Competência: "+p.competencia),
+            cr("div",{style:{display:"flex",justifyContent:"space-between",alignItems:"center"}},
+              cr("span",{style:{fontSize:11,color:T.textSec}},"Prazo: "+p.prazo),
+              cr(Badge,{color:SC[p.status],bg:SB[p.status]},p.status)
+            )
+          )) : cr("p",{style:{margin:0,fontSize:13,color:T.textSec}},"Nenhum PDI registrado.")
+        ),
+        // Feedbacks
+        cr("div",{style:{marginBottom:20}},
+          cr("h4",{style:{margin:"0 0 10px",fontSize:14,fontWeight:500,color:T.text}},"Feedbacks"),
+          historyCol.feedbacks.length ? historyCol.feedbacks.map(f=>cr("div",{key:f.id,style:{marginBottom:8,padding:"8px",background:T.bgSec,borderRadius:6}},
+            cr("div",{style:{display:"flex",gap:6,alignItems:"center",marginBottom:4}},
+              cr(Badge,{color:f.tipo==="positivo"?"#0F6E56":"#993C1D",bg:f.tipo==="positivo"?"#E1F5EE":"#FAECE7"},f.tipo==="positivo"?"Positivo":"Desenvolvimento"),
+              cr("span",{style:{fontSize:11,color:T.textSec}},f.data),
+              cr("span",{style:{fontSize:11,color:T.textSec,marginLeft:"auto"}},"por "+f.autor)
+            ),
+            cr("p",{style:{margin:0,fontSize:13,color:T.text}},f.texto)
+          )) : cr("p",{style:{margin:0,fontSize:13,color:T.textSec}},"Nenhum feedback registrado.")
+        ),
+        // Skills History
+        cr("div",{style:{marginBottom:20}},
+          cr("h4",{style:{margin:"0 0 10px",fontSize:14,fontWeight:500,color:T.text}},"Progressão de Skills"),
+          historyCol.skillsHistory.length ? historyCol.skillsHistory.slice().reverse().map((sh,i,arr)=>{
+            const prev = arr[i+1];
+            return cr("div",{key:sh.date,style:{marginBottom:8,padding:"8px",background:T.bgSec,borderRadius:6}},
+              cr("p",{style:{margin:"0 0 6px",fontSize:13,fontWeight:500,color:T.text}},sh.date),
+              cr("div",{style:{display:"grid",gridTemplateColumns:"1fr 1fr",gap:10}},
+                cr("div",null,
+                  cr("p",{style:{margin:"0 0 4px",fontSize:12,fontWeight:500,color:"#6d5ae6"}},"Soft Skills"),
+                  ...SS.map((s,j)=>{
+                    const prevLevel = prev ? MAT[prev.softSkills[j]] : "N/A";
+                    const currLevel = MAT[sh.softSkills[j]];
+                    return cr("p",{key:j,style:{margin:0,fontSize:11,color:T.textSec}},s+": "+(prevLevel !== currLevel ? prevLevel+" → "+currLevel : currLevel));
+                  })
+                ),
+                cr("div",null,
+                  cr("p",{style:{margin:"0 0 4px",fontSize:12,fontWeight:500,color:"#1D9E75"}},"Hard Skills"),
+                  ...HS.map((s,j)=>{
+                    const prevLevel = prev ? MAT[prev.hardSkills[j]] : "N/A";
+                    const currLevel = MAT[sh.hardSkills[j]];
+                    return cr("p",{key:j,style:{margin:0,fontSize:11,color:T.textSec}},s+": "+(prevLevel !== currLevel ? prevLevel+" → "+currLevel : currLevel));
+                  })
+                )
+              )
+            );
+          }) : cr("p",{style:{margin:0,fontSize:13,color:T.textSec}},"Nenhuma mudança de skills registrada.")
+        ),
+        // Ninebox History
+        cr("div",null,
+          cr("h4",{style:{margin:"0 0 10px",fontSize:14,fontWeight:500,color:T.text}},"Progressão Nine Box"),
+          historyCol.nineboxHistory.length ? historyCol.nineboxHistory.slice().reverse().map((nh,i,arr)=>{
+            const prev = arr[i+1];
+            const currLabel = NL[2-nh.potencial]?.[nh.desempenho] || "-";
+            const prevLabel = prev ? NL[2-prev.potencial]?.[prev.desempenho] || "-" : "N/A";
+            return cr("div",{key:nh.date,style:{marginBottom:8,padding:"8px",background:T.bgSec,borderRadius:6}},
+              cr("p",{style:{margin:0,fontSize:13,color:T.text}},nh.date+": "+(prevLabel !== currLabel ? prevLabel+" → "+currLabel : currLabel))
+            );
+          }) : cr("p",{style:{margin:0,fontSize:13,color:T.textSec}},"Nenhuma mudança no nine box registrada.")
         )
       )
     )
