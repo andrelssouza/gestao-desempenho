@@ -1,0 +1,186 @@
+{
+  "users": [
+    {
+      "id": "72e66d73-a32e-4292-94b4-244c24c2834d",
+      "name": "Lider Teste",
+      "email": "lider-1782189952748@teste.local",
+      "role": "Gestor",
+      "company": "Empresa Teste",
+      "passwordHash": "f8a1f494e18ae43fac8a62423131407c5f0ae62897fad7194010cfdc3a9554a3",
+      "verified": true,
+      "verificationCode": null,
+      "createdAt": "2026-06-23T04:45:52.789Z"
+    }
+  ],
+  "appStates": {
+    "lider-1782189952748@teste.local": {
+      "profile": {
+        "name": "Lider Teste",
+        "email": "lider-1782189952748@teste.local",
+        "role": "Gestor",
+        "company": "Empresa Teste",
+        "objective": "Conduzir conversas de feedback com seguranca e consistencia.",
+        "level": "Primeira lideranca",
+        "weeklyIntention": "Criar mais clareza nas expectativas da equipe.",
+        "nextMentoring": "Sexta-feira, 10:00"
+      },
+      "habits": [
+        {
+          "id": "586199f2-72e0-457f-a603-ecfc5b6402dd",
+          "title": "Check-in diario com foco",
+          "description": "Definir a prioridade de lideranca do dia em 3 minutos.",
+          "completedToday": true
+        },
+        {
+          "id": "5dde1509-d758-4cb5-9c89-bca92c88ce96",
+          "title": "Feedback de qualidade",
+          "description": "Registrar ao menos um feedback especifico por semana.",
+          "completedToday": false
+        },
+        {
+          "id": "2b885a48-f254-47f1-9b54-88365b9fd52a",
+          "title": "Reflexao de encerramento",
+          "description": "Anotar um aprendizado real ao final da semana.",
+          "completedToday": false
+        }
+      ],
+      "tracks": [
+        {
+          "id": "f6a24ee9-7bc9-4c4b-9912-126dbb0d35c7",
+          "title": "Conversas de feedback que movem gente",
+          "competency": "Feedback",
+          "progress": 58,
+          "modules": [
+            {
+              "title": "Preparar a conversa",
+              "done": true
+            },
+            {
+              "title": "Conduzir com clareza",
+              "done": true
+            },
+            {
+              "title": "Fechar com compromisso",
+              "done": false
+            }
+          ]
+        },
+        {
+          "id": "37d52bc8-ba1e-4f5e-97c1-db3390c73373",
+          "title": "Delegacao com autonomia",
+          "competency": "Delegacao",
+          "progress": 34,
+          "modules": [
+            {
+              "title": "Definir resultado esperado",
+              "done": true
+            },
+            {
+              "title": "Ajustar nivel de autonomia",
+              "done": false
+            },
+            {
+              "title": "Acompanhar sem microgerenciar",
+              "done": false
+            }
+          ]
+        },
+        {
+          "id": "141291fd-cfe9-40ca-beb3-bda27190bdfe",
+          "title": "Inteligencia emocional em pressao",
+          "competency": "Inteligencia emocional",
+          "progress": 71,
+          "modules": [
+            {
+              "title": "Nomear gatilhos",
+              "done": true
+            },
+            {
+              "title": "Regular resposta emocional",
+              "done": true
+            },
+            {
+              "title": "Transformar conflito em alinhamento",
+              "done": false
+            }
+          ]
+        }
+      ],
+      "competencies": [
+        {
+          "id": "36aea4a0-bdbc-4162-9478-45b232c7ff16",
+          "name": "Comunicacao",
+          "current": 3,
+          "target": 4
+        },
+        {
+          "id": "32e08375-1042-4d7f-b6df-e8bc2fc9473b",
+          "name": "Delegacao",
+          "current": 2,
+          "target": 4
+        },
+        {
+          "id": "020fe8fb-a4e0-4ee0-a628-b056c1863f53",
+          "name": "Feedback",
+          "current": 4,
+          "target": 5
+        },
+        {
+          "id": "a6ddd2b2-4d0b-48ed-a434-3a4c73089a81",
+          "name": "Gestao de equipe",
+          "current": 3,
+          "target": 4
+        },
+        {
+          "id": "8bc68d77-7aff-454b-8fbf-2c3efa233290",
+          "name": "Inteligencia emocional",
+          "current": 4,
+          "target": 5
+        }
+      ],
+      "feedbacks": [
+        {
+          "id": "b85ace23-c73b-47e5-b76e-0ff65807ff18",
+          "author": "Patricia Almeida",
+          "type": "Fortaleca",
+          "context": "Reuniao semanal da equipe",
+          "message": "Voce trouxe clareza para as prioridades e destravou a conversa rapidamente.",
+          "nextStep": "Repetir a mesma objetividade nas conversas individuais.",
+          "createdAt": "2026-06-23T04:45:52.801Z"
+        },
+        {
+          "id": "f151abe0-8e4a-466d-806d-22146101bb1f",
+          "author": "Marcelo Santos",
+          "type": "Desenvolva",
+          "context": "Acompanhamento de projeto",
+          "message": "Faltou combinar o nivel de autonomia esperado para evitar retrabalho.",
+          "nextStep": "Explicitar resultado, prazo e checkpoints antes de delegar.",
+          "createdAt": "2026-06-22T04:45:52.801Z"
+        }
+      ],
+      "actionPlan": [
+        {
+          "id": "47d2a13a-dc1a-4058-9ef1-b2e11d53e5bc",
+          "competency": "Delegacao",
+          "action": "Definir um template simples para delegacao com resultado, prazo e autonomia.",
+          "deadline": "2026-07-03",
+          "status": "em andamento"
+        },
+        {
+          "id": "48a6acda-899f-44d4-a745-ef0d4f9cccff",
+          "competency": "Feedback",
+          "action": "Realizar uma conversa de feedback estruturado com cada liderado-chave.",
+          "deadline": "2026-07-10",
+          "status": "pendente"
+        }
+      ],
+      "reflections": [
+        {
+          "id": "2175453b-ae2a-4ea8-b628-1dd0c9e61726",
+          "title": "Aprendizado da semana",
+          "content": "A equipe responde melhor quando eu explico contexto antes de cobrar entrega."
+        }
+      ]
+    }
+  }
+}

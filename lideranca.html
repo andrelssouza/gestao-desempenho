@@ -1,0 +1,65 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Atlas Lideranca</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@500;600;700&family=Manrope:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="./lideranca.css">
+</head>
+<body>
+  <div class="app-shell">
+    <aside class="sidebar">
+      <div class="brand-block">
+        <div class="brand-kicker">Atlas</div>
+        <h1>Desenvolva lideres com ritmo, clareza e acao.</h1>
+        <p>Um cockpit de evolucao para quem lidera pessoas de verdade.</p>
+      </div>
+
+      <nav class="sidebar-nav" aria-label="Principal">
+        <button class="nav-link active" data-view="dashboard">Painel</button>
+        <button class="nav-link" data-view="trilhas">Trilhas</button>
+        <button class="nav-link" data-view="avaliacoes">Avaliacoes</button>
+        <button class="nav-link" data-view="feedbacks">Feedbacks</button>
+        <button class="nav-link" data-view="plano">Plano de acao</button>
+        <button class="nav-link" data-view="perfil">Perfil</button>
+      </nav>
+
+      <div class="sidebar-footer">
+        <div class="footer-label">Sessao</div>
+        <div id="user-summary"></div>
+        <button id="logout-btn" class="ghost-button">Sair</button>
+      </div>
+    </aside>
+
+    <main class="content">
+      <header class="topbar">
+        <div>
+          <div class="eyebrow">MVP de desenvolvimento de lideres</div>
+          <h2 id="page-title">Painel</h2>
+        </div>
+
+        <div class="topbar-actions">
+          <button id="save-btn" class="secondary-button">Salvar agora</button>
+          <div id="save-indicator" class="save-indicator">Sincronizado</div>
+        </div>
+      </header>
+
+      <section id="hero-card" class="hero-card"></section>
+      <section id="page-content" class="page-content"></section>
+    </main>
+  </div>
+
+  <template id="metric-card-template">
+    <article class="metric-card">
+      <div class="metric-label"></div>
+      <div class="metric-value"></div>
+      <div class="metric-note"></div>
+    </article>
+  </template>
+
+  <script src="./lideranca.js"></script>
+</body>
+</html>
