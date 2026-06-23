@@ -2,9 +2,9 @@ const user = JSON.parse(localStorage.getItem('user') || 'null');
 const skipAuth = localStorage.getItem('skipAuth') === 'true';
 const currentUser = user || {
   name: 'Modo demonstracao',
-  email: 'demo@atlaslideranca.local',
-  role: 'Lider',
-  company: 'Workspace Demo',
+  email: 'demo@atlasperformance.local',
+  role: 'Gestor',
+  company: 'Atlas Performance Demo',
 };
 
 if (!user && !skipAuth) {
@@ -18,48 +18,93 @@ const userSummary = document.getElementById('user-summary');
 const saveIndicator = document.getElementById('save-indicator');
 const navLinks = Array.from(document.querySelectorAll('.nav-link'));
 const logoutButton = document.getElementById('logout-btn');
-const saveButton = document.getElementById('save-btn');
+const refreshButton = document.getElementById('refresh-btn');
 
-const storageKey = `atlas-leadership-state:${currentUser.email}`;
-let view = 'dashboard';
 let appState = null;
+const uiState = {
+  view: 'dashboard',
+  selectedPlayerId: null,
+  playersSearch: '',
+  playersSector: 'todos',
+  academyTrailId: null,
+  showFlashcardAnswer: false,
+};
+
+const nineBoxDescriptions = {
+  '1-1': {
+    title: 'Baixo potencial · Baixa performance',
+    description: 'Players que exigem plano corretivo, redefinicao de escopo ou reavaliacao de aderencia.',
+  },
+  '1-2': {
+    title: 'Potencial moderado · Baixa performance',
+    description: 'Existe espaco de crescimento, mas a entrega atual pede rotina intensa de acompanhamento.',
+  },
+  '1-3': {
+    title: 'Alto potencial · Baixa performance',
+    description: 'Talento com capacidade de evolucao, porem com baixa consistencia na entrega atual.',
+  },
+  '2-1': {
+    title: 'Baixo potencial · Performance media',
+    description: 'Bom para sustentacao operacional, com foco em estabilidade e previsibilidade.',
+  },
+  '2-2': {
+    title: 'Potencial moderado · Performance media',
+    description: 'Grupo de consolidacao, pronto para evoluir com metas mais claras e desenvolvimento dirigido.',
+  },
+  '2-3': {
+    title: 'Alto potencial · Performance media',
+    description: 'Players promissores, ideais para trilhas de aceleracao e missao progressivamente mais complexa.',
+  },
+  '3-1': {
+    title: 'Baixo potencial · Alta performance',
+    description: 'Especialistas consistentes, importantes para sustentacao, mentoria tecnica e confiabilidade.',
+  },
+  '3-2': {
+    title: 'Potencial moderado · Alta performance',
+    description: 'Performers fortes e estaveis, preparados para ampliar impacto ou liderar projetos-chave.',
+  },
+  '3-3': {
+    title: 'Alto potencial · Alta performance',
+    description: 'Talentos de destaque, prontos para sucessao, protagonismo e investimento prioritario.',
+  },
+};
 
 const copyByView = {
   dashboard: {
-    title: 'Painel',
-    eyebrow: 'Leitura da semana',
-    heroTitle: 'Lideranca evolui quando pratica vira sistema.',
-    description: 'Veja os rituais, trilhas e compromissos que mais movem sua maturidade como lider nesta semana.',
+    title: 'Dashboard',
+    eyebrow: 'Visao executiva',
+    heroTitle: 'Gestao de performance com prioridade, risco e decisao rapida.',
+    description: 'Identifique metas em vencimento, Players com Score em queda, PDIs atrasados e oportunidades de desenvolvimento.',
   },
-  trilhas: {
-    title: 'Trilhas',
-    eyebrow: 'Jornadas',
-    heroTitle: 'Cada trilha transforma intencao em comportamento observavel.',
-    description: 'Use modulos curtos, pratica aplicada e checkpoint de progresso para desenvolver competencias reais.',
+  players: {
+    title: 'Players',
+    eyebrow: 'Base operacional',
+    heroTitle: 'Todos os Players, seus setores, cargos e Score em uma leitura unica.',
+    description: 'Use filtros, compare Scores e mergulhe no detalhe individual quando houver risco ou destaque.',
   },
-  avaliacoes: {
-    title: 'Avaliacoes',
-    eyebrow: 'Competencias',
-    heroTitle: 'Lideres fortes medem o que querem melhorar.',
-    description: 'Acompanhe seus niveis atuais, meta desejada e os gaps que pedem acao imediata.',
+  player: {
+    title: 'Player',
+    eyebrow: 'Analise individual',
+    heroTitle: 'Detalhe completo do Player para decidir com mais seguranca.',
+    description: 'Visualize soft skills, hard skills, metas, PDI, historico e Score medio em um unico lugar.',
   },
-  feedbacks: {
-    title: 'Feedbacks',
-    eyebrow: 'Aprendizado social',
-    heroTitle: 'Feedback bom acelera consciencia e encurta o caminho da evolucao.',
-    description: 'Centralize contexto, comportamento, impacto e proxima acao em um unico fluxo simples.',
+  ninebox: {
+    title: 'Ninebox',
+    eyebrow: 'Mapa de talento',
+    heroTitle: 'Posicionamento automatico para orientar sucessao, risco e desenvolvimento.',
+    description: 'Cada celula explica o momento do Player e sugere a leitura de gestao mais adequada.',
   },
-  plano: {
-    title: 'Plano de acao',
-    eyebrow: 'Execucao',
-    heroTitle: 'Sem plano, o desenvolvimento continua bonito so no discurso.',
-    description: 'Transforme cada insight em um compromisso claro com prazo, status e foco de competencia.',
+  relatorios: {
+    title: 'Relatorios',
+    eyebrow: 'Evolucao historica',
+    heroTitle: 'Entenda quem melhorou, quem piorou e onde o Score mudou com o tempo.',
+    description: 'Compare ciclos, identifique tendencias e transforme historico em conversa de desenvolvimento.',
   },
-  perfil: {
-    title: 'Perfil',
-    eyebrow: 'Direcao',
-    heroTitle: 'Seu contexto define o ritmo, mas a disciplina define a curva.',
-    description: 'Ajuste objetivo, intencao semanal e nivel atual para manter o app coerente com a sua realidade.',
+  academy: {
+    title: 'Academy',
+    eyebrow: 'Aprendizagem aplicada',
+    heroTitle: 'Trilhas, Saber em Pilulas e quiz para fechar o ciclo entre gap e evolucao.',
+    description: 'Conecte o gap do Player a uma jornada concreta de desenvolvimento, reforco diario e pratica.',
   },
 };
 
@@ -73,15 +118,45 @@ function createId() {
 
 function escapeHtml(value) {
   return String(value)
-    .replaceAll('&', '&amp;')
-    .replaceAll('<', '&lt;')
-    .replaceAll('>', '&gt;')
-    .replaceAll('"', '&quot;')
-    .replaceAll("'", '&#39;');
+    .replace(/&/g, '&amp;')
+    .replace(/</g, '&lt;')
+    .replace(/>/g, '&gt;')
+    .replace(/"/g, '&quot;')
+    .replace(/'/g, '&#39;');
 }
 
-function setSaveState(text) {
+function setStatus(text) {
   saveIndicator.textContent = text;
+}
+
+function formatDate(value) {
+  return new Date(`${value}T00:00:00`).toLocaleDateString('pt-BR');
+}
+
+function daysUntil(dateValue) {
+  const now = new Date('2026-06-23T00:00:00');
+  const target = new Date(`${dateValue}T00:00:00`);
+  return Math.round((target - now) / 86400000);
+}
+
+function getStatusClass(status) {
+  if (status === 'em_dia' || status === 'concluida' || status === 'concluido') {
+    return 'status-ok';
+  }
+  if (status === 'atencao' || status === 'em_andamento') {
+    return 'status-warning';
+  }
+  return 'status-danger';
+}
+
+function getRiskClass(score) {
+  if (score >= 8) {
+    return 'risk-low';
+  }
+  if (score >= 6) {
+    return 'risk-medium';
+  }
+  return 'risk-high';
 }
 
 function renderUserSummary() {
@@ -91,123 +166,265 @@ function renderUserSummary() {
   `;
 }
 
-function buildDefaultState() {
+function buildFallbackState() {
+  const leadershipTrailId = createId();
+  const communicationTrailId = createId();
+  const executionTrailId = createId();
+
   return {
-    profile: {
+    manager: {
       name: currentUser.name,
       email: currentUser.email,
       role: currentUser.role,
       company: currentUser.company,
-      objective: 'Conduzir conversas de feedback com seguranca e consistencia.',
-      level: 'Primeira lideranca',
-      weeklyIntention: 'Criar mais clareza nas expectativas da equipe.',
-      nextMentoring: 'Sexta-feira, 10:00',
+      team: 'Time Growth',
     },
-    habits: [
+    players: [
       {
         id: createId(),
-        title: 'Check-in diario com foco',
-        description: 'Definir a prioridade de lideranca do dia em 3 minutos.',
-        completedToday: true,
-      },
-      {
-        id: createId(),
-        title: 'Feedback de qualidade',
-        description: 'Registrar ao menos um feedback especifico por semana.',
-        completedToday: false,
-      },
-      {
-        id: createId(),
-        title: 'Reflexao de encerramento',
-        description: 'Anotar um aprendizado real ao final da semana.',
-        completedToday: false,
-      },
-    ],
-    tracks: [
-      {
-        id: createId(),
-        title: 'Conversas de feedback que movem gente',
-        competency: 'Feedback',
-        progress: 58,
-        modules: [
-          { title: 'Preparar a conversa', done: true },
-          { title: 'Conduzir com clareza', done: true },
-          { title: 'Fechar com compromisso', done: false },
+        name: 'Ana Souza',
+        role: 'Coordenadora Comercial',
+        sector: 'Vendas',
+        score: 6.4,
+        performance: 2,
+        potential: 3,
+        statusGoals: 'atrasado',
+        statusPdi: 'atencao',
+        softSkills: [
+          { name: 'Lideranca', score: 4.8, previous: 4.2 },
+          { name: 'Comunicacao', score: 7.1, previous: 6.4 },
+          { name: 'Gestao de conflitos', score: 6.0, previous: 6.2 },
         ],
-      },
-      {
-        id: createId(),
-        title: 'Delegacao com autonomia',
-        competency: 'Delegacao',
-        progress: 34,
-        modules: [
-          { title: 'Definir resultado esperado', done: true },
-          { title: 'Ajustar nivel de autonomia', done: false },
-          { title: 'Acompanhar sem microgerenciar', done: false },
+        hardSkills: [
+          { name: 'Pipeline comercial', score: 7.8, previous: 7.4 },
+          { name: 'Forecast', score: 6.6, previous: 6.0 },
+          { name: 'Negociacao', score: 7.3, previous: 6.8 },
         ],
-      },
-      {
-        id: createId(),
-        title: 'Inteligencia emocional em pressao',
-        competency: 'Inteligencia emocional',
-        progress: 71,
-        modules: [
-          { title: 'Nomear gatilhos', done: true },
-          { title: 'Regular resposta emocional', done: true },
-          { title: 'Transformar conflito em alinhamento', done: false },
+        goals: [
+          { title: 'Atingir 92% da meta trimestral', deadline: '2026-06-27', progress: 78, scoreMeta: 6.3, status: 'em_andamento' },
+          { title: 'Fechar playbook da equipe', deadline: '2026-06-22', progress: 55, scoreMeta: 5.8, status: 'atrasada' },
         ],
-      },
-    ],
-    competencies: [
-      { id: createId(), name: 'Comunicacao', current: 3, target: 4 },
-      { id: createId(), name: 'Delegacao', current: 2, target: 4 },
-      { id: createId(), name: 'Feedback', current: 4, target: 5 },
-      { id: createId(), name: 'Gestao de equipe', current: 3, target: 4 },
-      { id: createId(), name: 'Inteligencia emocional', current: 4, target: 5 },
-    ],
-    feedbacks: [
-      {
-        id: createId(),
-        author: 'Patricia Almeida',
-        type: 'Fortaleca',
-        context: 'Reuniao semanal da equipe',
-        message: 'Voce trouxe clareza para as prioridades e destravou a conversa rapidamente.',
-        nextStep: 'Repetir a mesma objetividade nas conversas individuais.',
-        createdAt: new Date().toISOString(),
+        pdis: [
+          { title: 'Rito de feedback com o time', action: 'Rodar 1:1 estruturado com roteiro padrao por 4 semanas.', deadline: '2026-06-21', status: 'fora_do_prazo' },
+          { title: 'Delegacao em sprints', action: 'Aplicar matriz de autonomia em dois projetos da equipe.', deadline: '2026-06-30', status: 'em_andamento' },
+        ],
+        history: [
+          { cycle: 'Q4 2025', score: 5.9, improved: ['Comunicacao'], worsened: ['Delegacao'] },
+          { cycle: 'Q1 2026', score: 6.1, improved: ['Forecast'], worsened: ['Gestao de conflitos'] },
+          { cycle: 'Q2 2026', score: 6.4, improved: ['Lideranca'], worsened: ['Execucao de metas'] },
+        ],
+        academy: { recommendedTrailId: leadershipTrailId },
       },
       {
         id: createId(),
-        author: 'Marcelo Santos',
-        type: 'Desenvolva',
-        context: 'Acompanhamento de projeto',
-        message: 'Faltou combinar o nivel de autonomia esperado para evitar retrabalho.',
-        nextStep: 'Explicitar resultado, prazo e checkpoints antes de delegar.',
-        createdAt: new Date(Date.now() - 86400000).toISOString(),
+        name: 'Bruno Melo',
+        role: 'Analista de Operacoes',
+        sector: 'Operacoes',
+        score: 8.6,
+        performance: 3,
+        potential: 2,
+        statusGoals: 'em_dia',
+        statusPdi: 'em_dia',
+        softSkills: [
+          { name: 'Organizacao', score: 8.8, previous: 8.1 },
+          { name: 'Colaboracao', score: 8.2, previous: 7.7 },
+          { name: 'Ownership', score: 8.5, previous: 8.0 },
+        ],
+        hardSkills: [
+          { name: 'Processos', score: 9.0, previous: 8.4 },
+          { name: 'Analise de dados', score: 8.7, previous: 8.1 },
+          { name: 'Melhoria continua', score: 8.4, previous: 7.8 },
+        ],
+        goals: [
+          { title: 'Reduzir retrabalho em 18%', deadline: '2026-06-29', progress: 84, scoreMeta: 8.9, status: 'em_andamento' },
+          { title: 'Atualizar SOP da area', deadline: '2026-07-05', progress: 63, scoreMeta: 8.0, status: 'em_andamento' },
+        ],
+        pdis: [
+          { title: 'Mentoria cruzada', action: 'Apoiar dois Players juniores em desenho de rotina operacional.', deadline: '2026-07-01', status: 'em_andamento' },
+        ],
+        history: [
+          { cycle: 'Q4 2025', score: 7.8, improved: ['Ownership'], worsened: ['Comunicacao executiva'] },
+          { cycle: 'Q1 2026', score: 8.1, improved: ['Processos'], worsened: ['-'] },
+          { cycle: 'Q2 2026', score: 8.6, improved: ['Analise de dados'], worsened: ['-'] },
+        ],
+        academy: { recommendedTrailId: executionTrailId },
       },
-    ],
-    actionPlan: [
       {
         id: createId(),
-        competency: 'Delegacao',
-        action: 'Definir um template simples para delegacao com resultado, prazo e autonomia.',
-        deadline: '2026-07-03',
-        status: 'em andamento',
+        name: 'Carla Dias',
+        role: 'Gerente de RH',
+        sector: 'People',
+        score: 7.2,
+        performance: 2,
+        potential: 2,
+        statusGoals: 'atencao',
+        statusPdi: 'em_dia',
+        softSkills: [
+          { name: 'Comunicacao', score: 8.0, previous: 7.1 },
+          { name: 'Lideranca', score: 6.5, previous: 6.2 },
+          { name: 'Escuta ativa', score: 7.7, previous: 7.4 },
+        ],
+        hardSkills: [
+          { name: 'People analytics', score: 7.3, previous: 6.9 },
+          { name: 'Rituais de performance', score: 7.1, previous: 6.8 },
+          { name: 'Desenho de PDI', score: 6.8, previous: 6.2 },
+        ],
+        goals: [
+          { title: 'Implementar comite de calibragem', deadline: '2026-06-26', progress: 68, scoreMeta: 7.0, status: 'em_andamento' },
+          { title: 'Revisar trilhas de onboarding', deadline: '2026-06-20', progress: 40, scoreMeta: 5.9, status: 'atrasada' },
+        ],
+        pdis: [
+          { title: 'Leitura de indicadores por squad', action: 'Executar leitura quinzenal com recorte por lider.', deadline: '2026-06-29', status: 'em_andamento' },
+        ],
+        history: [
+          { cycle: 'Q4 2025', score: 6.6, improved: ['Comunicacao'], worsened: ['Priorizacao'] },
+          { cycle: 'Q1 2026', score: 6.9, improved: ['People analytics'], worsened: ['Ritmo de execucao'] },
+          { cycle: 'Q2 2026', score: 7.2, improved: ['Escuta ativa'], worsened: ['Follow-up de metas'] },
+        ],
+        academy: { recommendedTrailId: communicationTrailId },
       },
       {
         id: createId(),
-        competency: 'Feedback',
-        action: 'Realizar uma conversa de feedback estruturado com cada liderado-chave.',
-        deadline: '2026-07-10',
-        status: 'pendente',
+        name: 'Diego Ramos',
+        role: 'Supervisor de CX',
+        sector: 'Customer Experience',
+        score: 5.8,
+        performance: 1,
+        potential: 2,
+        statusGoals: 'atrasado',
+        statusPdi: 'atrasado',
+        softSkills: [
+          { name: 'Gestao de equipe', score: 5.0, previous: 5.4 },
+          { name: 'Feedback', score: 5.7, previous: 5.9 },
+          { name: 'Comunicacao', score: 6.0, previous: 6.1 },
+        ],
+        hardSkills: [
+          { name: 'SLA operacional', score: 6.3, previous: 6.8 },
+          { name: 'Qualidade de atendimento', score: 5.9, previous: 6.0 },
+          { name: 'Analise de causa', score: 5.8, previous: 6.2 },
+        ],
+        goals: [
+          { title: 'Reduzir backlog do suporte', deadline: '2026-06-21', progress: 48, scoreMeta: 5.4, status: 'atrasada' },
+          { title: 'Fechar plano de escala', deadline: '2026-06-24', progress: 52, scoreMeta: 5.9, status: 'em_andamento' },
+        ],
+        pdis: [
+          { title: 'Rotina de calibragem com lideres', action: 'Formalizar checkpoints semanais com foco em atendimento critico.', deadline: '2026-06-18', status: 'fora_do_prazo' },
+        ],
+        history: [
+          { cycle: 'Q4 2025', score: 6.4, improved: ['SLA operacional'], worsened: ['Gestao de equipe'] },
+          { cycle: 'Q1 2026', score: 6.1, improved: ['Comunicacao'], worsened: ['Feedback'] },
+          { cycle: 'Q2 2026', score: 5.8, improved: ['-'], worsened: ['Execucao de metas'] },
+        ],
+        academy: { recommendedTrailId: leadershipTrailId },
       },
-    ],
-    reflections: [
       {
         id: createId(),
-        title: 'Aprendizado da semana',
-        content: 'A equipe responde melhor quando eu explico contexto antes de cobrar entrega.',
+        name: 'Fernanda Torres',
+        role: 'Especialista Financeira',
+        sector: 'Financeiro',
+        score: 9.1,
+        performance: 3,
+        potential: 3,
+        statusGoals: 'em_dia',
+        statusPdi: 'atencao',
+        softSkills: [
+          { name: 'Influencia', score: 8.5, previous: 8.0 },
+          { name: 'Clareza executiva', score: 9.2, previous: 8.6 },
+          { name: 'Priorizacao', score: 9.0, previous: 8.4 },
+        ],
+        hardSkills: [
+          { name: 'Planejamento financeiro', score: 9.4, previous: 8.9 },
+          { name: 'Modelagem', score: 9.0, previous: 8.7 },
+          { name: 'Forecast', score: 9.1, previous: 8.8 },
+        ],
+        goals: [
+          { title: 'Fechar projeção do semestre', deadline: '2026-06-28', progress: 88, scoreMeta: 9.2, status: 'em_andamento' },
+          { title: 'Automatizar rotina de fechamento', deadline: '2026-07-08', progress: 61, scoreMeta: 8.8, status: 'em_andamento' },
+        ],
+        pdis: [
+          { title: 'Preparacao para sucessao', action: 'Liderar leitura mensal do comite executivo e mentorar um analista senior.', deadline: '2026-06-25', status: 'em_andamento' },
+        ],
+        history: [
+          { cycle: 'Q4 2025', score: 8.4, improved: ['Influencia'], worsened: ['-'] },
+          { cycle: 'Q1 2026', score: 8.7, improved: ['Forecast'], worsened: ['-'] },
+          { cycle: 'Q2 2026', score: 9.1, improved: ['Clareza executiva'], worsened: ['-'] },
+        ],
+        academy: { recommendedTrailId: communicationTrailId },
       },
     ],
+    academy: {
+      trails: [
+        {
+          id: leadershipTrailId,
+          competency: 'Lideranca',
+          title: 'Liderar sem perder a clareza',
+          description: 'Trilha para Players com gap em lideranca, delegacao e acompanhamento de time.',
+          level: 'intermediario',
+          scenario: 'Um Player do seu time nao entrega ha duas semanas. Como voce conduz a conversa sem cair em generalidades?',
+          saber: {
+            titleBook: 'As 5 Disfuncoes de um Time',
+            summary: 'Times fortes constroem confianca, lidam com conflito produtivo e assumem compromisso claro.',
+            application: 'Na proxima reuniao, troque opinioes vagas por acordos objetivos com dono, prazo e criterio de sucesso.',
+          },
+          flashcards: [
+            {
+              question: 'Qual e o primeiro passo para uma conversa de lideranca mais efetiva?',
+              answer: 'Definir contexto, fato observado e expectativa com clareza.',
+            },
+            {
+              question: 'Como reforcar accountability sem soar controlador?',
+              answer: 'Combinando checkpoints, resultado esperado e autonomia de execucao.',
+            },
+          ],
+        },
+        {
+          id: communicationTrailId,
+          competency: 'Comunicacao',
+          title: 'Comunicacao que organiza a execucao',
+          description: 'Trilha para aprimorar clareza, influencia e narrativa executiva.',
+          level: 'basico',
+          scenario: 'Voce precisa atualizar a diretoria sobre um atraso. O que comunicar primeiro: contexto, culpados ou proxima acao?',
+          saber: {
+            titleBook: 'Comunicacao Nao Violenta',
+            summary: 'Separar observacao, sentimento, necessidade e pedido reduz ruido e aumenta adesao.',
+            application: 'Na proxima atualizacao, descreva o fato, o impacto e o pedido objetivo sem misturar julgamento.',
+          },
+          flashcards: [
+            {
+              question: 'O que torna uma comunicacao executiva mais forte?',
+              answer: 'Mensagem curta, contexto claro, risco visivel e proximo passo objetivo.',
+            },
+            {
+              question: 'Como evitar ruido em alinhamentos?',
+              answer: 'Confirmando entendimento, prazo e dono da entrega no mesmo momento.',
+            },
+          ],
+        },
+        {
+          id: executionTrailId,
+          competency: 'Execucao',
+          title: 'Execucao com disciplina e previsibilidade',
+          description: 'Trilha para melhorar acompanhamento de metas, ritmo e consistencia operacional.',
+          level: 'avancado',
+          scenario: 'Sua meta esta perto do prazo e o progresso nao acompanha. O que fazer hoje para recuperar previsibilidade?',
+          saber: {
+            titleBook: 'A Meta',
+            summary: 'Bons resultados aparecem quando o sistema identifica gargalos e age sobre eles com disciplina.',
+            application: 'Mapeie o gargalo da semana, limite o volume paralelo e acompanhe um indicador diario de progresso.',
+          },
+          flashcards: [
+            {
+              question: 'Qual e o primeiro sinal de risco em uma meta?',
+              answer: 'Prazo se aproximando com progresso abaixo do esperado e sem dono de recuperacao.',
+            },
+            {
+              question: 'O que aumenta previsibilidade?',
+              answer: 'Quebra da meta em checkpoints menores com leitura frequente de andamento.',
+            },
+          ],
+        },
+      ],
+    },
   };
 }
 
@@ -219,58 +436,64 @@ async function apiGet(url) {
   return response.json();
 }
 
-async function apiPost(url, body) {
-  const response = await fetch(url, {
-    method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify(body),
-  });
-  if (!response.ok) {
-    throw new Error('Falha ao salvar dados.');
-  }
-  return response.json();
-}
-
 async function loadState() {
-  const localState = localStorage.getItem(storageKey);
-  if (localState) {
-    return JSON.parse(localState);
-  }
-
-  if (skipAuth) {
-    return buildDefaultState();
-  }
-
   try {
-    const serverState = await apiGet(`/api/app-state?email=${encodeURIComponent(currentUser.email)}`);
-    localStorage.setItem(storageKey, JSON.stringify(serverState));
-    return serverState;
+    return await apiGet(`/api/app-state?email=${encodeURIComponent(currentUser.email)}`);
   } catch (_error) {
-    return buildDefaultState();
+    return buildFallbackState();
   }
 }
 
-async function persistState(reason) {
-  localStorage.setItem(storageKey, JSON.stringify(appState));
-  setSaveState(reason || 'Salvando...');
-
-  if (skipAuth) {
-    setSaveState('Salvo localmente');
-    return;
+function getSelectedPlayer() {
+  if (!appState.players.length) {
+    return null;
   }
 
-  try {
-    await apiPost('/api/app-state', {
-      email: currentUser.email,
-      state: appState,
+  return appState.players.find((player) => player.id === uiState.selectedPlayerId) || appState.players[0];
+}
+
+function getDashboardData() {
+  const players = appState.players;
+  const goalsNearDeadline = [];
+  const overdueGoals = [];
+  const overduePdis = [];
+  const riskPlayers = [];
+
+  players.forEach((player) => {
+    player.goals.forEach((goal) => {
+      const days = daysUntil(goal.deadline);
+      if (goal.status !== 'concluida' && days >= 0 && days <= 7) {
+        goalsNearDeadline.push({ player, ...goal, days });
+      }
+      if (goal.status === 'atrasada' || days < 0) {
+        overdueGoals.push({ player, ...goal, days });
+      }
     });
-    setSaveState('Sincronizado');
-  } catch (_error) {
-    setSaveState('Salvo localmente');
-  }
+
+    player.pdis.forEach((pdi) => {
+      const days = daysUntil(pdi.deadline);
+      if (pdi.status === 'fora_do_prazo' || days < 0) {
+        overduePdis.push({ player, ...pdi, days });
+      }
+    });
+
+    if (player.score < 6.5 || player.statusGoals === 'atrasado' || player.statusPdi === 'atrasado') {
+      riskPlayers.push(player);
+    }
+  });
+
+  return {
+    averageScore: (players.reduce((total, player) => total + player.score, 0) / players.length).toFixed(1),
+    playersAtRisk: riskPlayers.length,
+    goalsNearDeadline,
+    overdueGoals,
+    overduePdis,
+    riskPlayers,
+    topPlayers: [...players].sort((a, b) => b.score - a.score).slice(0, 3),
+  };
 }
 
-function metricCard(label, value, note) {
+function renderMetric(label, value, note) {
   return `
     <article class="metric-card">
       <div class="metric-label">${escapeHtml(label)}</div>
@@ -280,597 +503,591 @@ function metricCard(label, value, note) {
   `;
 }
 
-function percentage(value, total) {
-  if (!total) {
-    return 0;
-  }
-  return Math.round((value / total) * 100);
-}
-
-function formatDate(dateValue) {
-  if (!dateValue) {
-    return 'Sem prazo';
-  }
-  return new Date(`${dateValue}T00:00:00`).toLocaleDateString('pt-BR');
-}
-
-function competencyDots(value) {
-  return Array.from({ length: 5 }, (_item, index) => {
-    const active = index < value ? 'active' : '';
-    return `<span class="kpi-dot ${active}"></span>`;
-  }).join('');
-}
-
-function getSummaryMetrics() {
-  const completedHabits = appState.habits.filter((habit) => habit.completedToday).length;
-  const completedActions = appState.actionPlan.filter((item) => item.status === 'concluido').length;
-  const averageTrack = appState.tracks.length
-    ? Math.round(appState.tracks.reduce((total, track) => total + track.progress, 0) / appState.tracks.length)
-    : 0;
-  const biggestGap = [...appState.competencies]
-    .sort((a, b) => (b.target - b.current) - (a.target - a.current))[0];
-
-  return {
-    completedHabits,
-    completedActions,
-    averageTrack,
-    biggestGap: biggestGap ? biggestGap.name : 'Sem dados',
-  };
-}
-
 function renderHero() {
-  const copy = copyByView[view];
+  const copy = copyByView[uiState.view];
+  const selectedPlayer = getSelectedPlayer();
   heroCard.innerHTML = `
     <div>
       <div class="eyebrow">${escapeHtml(copy.eyebrow)}</div>
       <h1 class="hero-title">${escapeHtml(copy.heroTitle)}</h1>
       <p class="hero-copy">${escapeHtml(copy.description)}</p>
       <div class="hero-tags">
-        <span class="tag">${escapeHtml(appState.profile.level)}</span>
-        <span class="tag">${escapeHtml(appState.profile.weeklyIntention)}</span>
-        <span class="tag">${escapeHtml(appState.profile.nextMentoring)}</span>
+        <span class="pill">Time ${escapeHtml(appState.manager.team)}</span>
+        <span class="pill">${appState.players.length} Players ativos</span>
+        ${selectedPlayer ? `<span class="pill">Player foco: ${escapeHtml(selectedPlayer.name)}</span>` : ''}
       </div>
     </div>
     <div class="hero-side">
-      <div class="side-panel">
-        <div class="section-kicker">Objetivo atual</div>
-        <strong>${escapeHtml(appState.profile.objective)}</strong>
-        <p class="body-copy">Meta semanal: ${escapeHtml(appState.profile.weeklyIntention)}</p>
+      <div class="summary-card">
+        <div class="section-kicker">Gestor logado</div>
+        <strong>${escapeHtml(appState.manager.name)}</strong>
+        <p class="body-copy">${escapeHtml(appState.manager.role)} · ${escapeHtml(appState.manager.company)}</p>
       </div>
-      <div class="side-panel">
-        <div class="section-kicker">Proxima sessao</div>
-        <strong>${escapeHtml(appState.profile.nextMentoring)}</strong>
-        <p class="body-copy">Use esse momento para revisar trilhas, gaps e compromissos em aberto.</p>
+      <div class="summary-card">
+        <div class="section-kicker">Leitura rapida</div>
+        <strong>Score padrao de 1 a 10</strong>
+        <p class="body-copy">Ninebox, historico e Academy conectados ao desenvolvimento de cada Player.</p>
       </div>
     </div>
   `;
 }
 
 function renderDashboard() {
-  const summary = getSummaryMetrics();
-  const nextAction = appState.actionPlan[0];
-  const reflection = appState.reflections[0];
+  const dashboard = getDashboardData();
 
   pageContent.innerHTML = `
     <div class="metrics-grid">
-      ${metricCard('Habitos concluidos hoje', String(summary.completedHabits), 'Ritmo diario de lideranca')}
-      ${metricCard('Media das trilhas', `${summary.averageTrack}%`, 'Progresso consolidado')}
-      ${metricCard('Acoes concluidas', String(summary.completedActions), 'Execucao do PDI')}
-      ${metricCard('Maior gap atual', summary.biggestGap, 'Prioridade de desenvolvimento')}
+      ${renderMetric('Score medio do time', dashboard.averageScore, 'Media geral dos Players')}
+      ${renderMetric('Metas vencendo', String(dashboard.goalsNearDeadline.length), 'Proximos 7 dias')}
+      ${renderMetric('PDIs fora do prazo', String(dashboard.overduePdis.length), 'Demandam acao do gestor')}
+      ${renderMetric('Players em risco', String(dashboard.playersAtRisk), 'Score baixo ou atraso relevante')}
     </div>
 
-    <div class="grid-2">
-      <section class="grid-card">
+    <div class="two-columns">
+      <section class="list-card">
         <div class="panel-header">
           <div>
-            <div class="section-kicker">Rituais</div>
-            <h3>Habitos de lideranca da semana</h3>
+            <div class="section-kicker">Prioridades</div>
+            <div class="section-title">Metas que vencem em breve</div>
           </div>
-          <span class="tag">${summary.completedHabits}/${appState.habits.length} feitos hoje</span>
         </div>
         <div class="stack">
-          ${appState.habits.map((habit) => `
-            <article class="habit-item">
+          ${dashboard.goalsNearDeadline.map((goal) => `
+            <article class="alert-item">
               <div class="item-top">
                 <div>
-                  <div class="item-title">${escapeHtml(habit.title)}</div>
-                  <div class="item-description">${escapeHtml(habit.description)}</div>
+                  <div class="item-title">${escapeHtml(goal.title)}</div>
+                  <div class="item-subtitle">${escapeHtml(goal.player.name)} · ${escapeHtml(goal.player.sector)}</div>
                 </div>
-                <button class="status-button ${habit.completedToday ? 'done' : ''}" data-toggle-habit="${habit.id}">
-                  ${habit.completedToday ? 'Concluido' : 'Marcar como feito'}
-                </button>
+                <span class="deadline-badge ${goal.days <= 2 ? 'status-danger' : 'status-warning'}">${goal.days} dia(s)</span>
               </div>
+              <div class="item-description">Progresso de ${goal.progress}% · Score da meta ${goal.scoreMeta.toFixed(1)}</div>
             </article>
-          `).join('')}
+          `).join('') || '<div class="empty-state">Nenhuma meta com vencimento iminente.</div>'}
         </div>
       </section>
 
-      <section class="grid-card">
+      <section class="list-card">
         <div class="panel-header">
           <div>
-            <div class="section-kicker">Foco</div>
-            <h3>Compromisso em evidencia</h3>
+            <div class="section-kicker">Risco</div>
+            <div class="section-title">Pendencias criticas</div>
           </div>
         </div>
-        <article class="reflection-card">
-          <h3>${nextAction ? escapeHtml(nextAction.competency) : 'Sem acao priorizada'}</h3>
-          <p class="body-copy">${nextAction ? escapeHtml(nextAction.action) : 'Crie o primeiro item do seu plano para puxar a evolucao.'}</p>
-          <div class="split-line">
-            <span>Prazo</span>
-            <strong>${nextAction ? formatDate(nextAction.deadline) : 'A definir'}</strong>
-          </div>
-        </article>
-        <article class="reflection-card">
-          <h3>${reflection ? escapeHtml(reflection.title) : 'Sem reflexao ainda'}</h3>
-          <p class="body-copy">${reflection ? escapeHtml(reflection.content) : 'Registre um aprendizado para consolidar o que funcionou na pratica.'}</p>
-        </article>
+        <div class="stack">
+          ${dashboard.overdueGoals.map((goal) => `
+            <article class="alert-item">
+              <div class="item-top">
+                <div>
+                  <div class="item-title">${escapeHtml(goal.player.name)}</div>
+                  <div class="item-subtitle">Meta atrasada: ${escapeHtml(goal.title)}</div>
+                </div>
+                <span class="status-tag status-danger">atrasada</span>
+              </div>
+            </article>
+          `).join('')}
+          ${dashboard.overduePdis.map((pdi) => `
+            <article class="alert-item">
+              <div class="item-top">
+                <div>
+                  <div class="item-title">${escapeHtml(pdi.player.name)}</div>
+                  <div class="item-subtitle">PDI fora do prazo: ${escapeHtml(pdi.title)}</div>
+                </div>
+                <span class="status-tag status-danger">fora do prazo</span>
+              </div>
+            </article>
+          `).join('') || '<div class="empty-state">Nenhuma pendencia critica identificada.</div>'}
+        </div>
       </section>
     </div>
 
-    <div class="grid-2">
-      <section class="timeline-card">
-        <div class="section-kicker">Trilhas</div>
-        <h3>Jornadas em andamento</h3>
+    <div class="two-columns">
+      <section class="table-card">
+        <div class="panel-header">
+          <div>
+            <div class="section-kicker">Ranking</div>
+            <div class="section-title">Top Players por Score</div>
+          </div>
+        </div>
         <div class="stack">
-          ${appState.tracks.map((track) => `
-            <article class="track-item">
-              <div class="item-top">
+          ${dashboard.topPlayers.map((player, index) => `
+            <article class="player-overview">
+              <div class="player-card-top">
                 <div>
-                  <div class="item-title">${escapeHtml(track.title)}</div>
-                  <div class="item-subtitle">${escapeHtml(track.competency)}</div>
+                  <div class="player-name">${index + 1}. ${escapeHtml(player.name)}</div>
+                  <div class="table-subtitle">${escapeHtml(player.role)} · ${escapeHtml(player.sector)}</div>
                 </div>
-                <button class="status-button" data-advance-track="${track.id}">Avancar</button>
-              </div>
-              <div class="progress-wrap">
-                <div class="progress-track"><div class="progress-bar" style="width:${track.progress}%"></div></div>
-                <div class="progress-labels">
-                  <span>${track.progress}% concluido</span>
-                  <span>${track.modules.filter((module) => module.done).length}/${track.modules.length} modulos</span>
-                </div>
+                <span class="score-badge">Score ${player.score.toFixed(1)}</span>
               </div>
             </article>
           `).join('')}
         </div>
       </section>
 
-      <section class="timeline-card">
-        <div class="section-kicker">Competencias</div>
-        <h3>Gap entre nivel atual e desejado</h3>
+      <section class="table-card">
+        <div class="panel-header">
+          <div>
+            <div class="section-kicker">Atencao</div>
+            <div class="section-title">Players que pedem acao do gestor</div>
+          </div>
+        </div>
         <div class="stack">
-          ${appState.competencies.map((competency) => `
-            <article class="competency-item">
-              <div class="item-top">
-                <div class="item-title">${escapeHtml(competency.name)}</div>
-                <div class="tag">Meta ${competency.target}/5</div>
+          ${dashboard.riskPlayers.map((player) => `
+            <article class="player-overview">
+              <div class="player-card-top">
+                <div>
+                  <div class="player-name">${escapeHtml(player.name)}</div>
+                  <div class="table-subtitle">${escapeHtml(player.role)} · ${escapeHtml(player.sector)}</div>
+                </div>
+                <span class="risk-pill ${getRiskClass(player.score)}">Score ${player.score.toFixed(1)}</span>
               </div>
-              <div class="kpi-line">
-                <span>Nivel atual</span>
-                <div class="kpi-scale">${competencyDots(competency.current)}</div>
+              <div class="score-row">
+                <button class="table-row-button" data-player="${player.id}">Abrir detalhe do Player</button>
               </div>
             </article>
-          `).join('')}
+          `).join('') || '<div class="empty-state">Nenhum Player em risco neste momento.</div>'}
         </div>
       </section>
     </div>
   `;
 }
 
-function renderTracks() {
+function renderPlayers() {
+  const sectors = [...new Set(appState.players.map((player) => player.sector))];
+  const filteredPlayers = appState.players.filter((player) => {
+    const searchMatch = player.name.toLowerCase().includes(uiState.playersSearch.toLowerCase());
+    const sectorMatch = uiState.playersSector === 'todos' || player.sector === uiState.playersSector;
+    return searchMatch && sectorMatch;
+  });
+
   pageContent.innerHTML = `
-    <div class="cards-grid">
-      ${appState.tracks.map((track) => `
-        <article class="grid-card">
+    <section class="table-card">
+      <div class="panel-header">
+        <div>
+          <div class="section-kicker">Base geral</div>
+          <div class="section-title">Players</div>
+        </div>
+      </div>
+
+      <div class="toolbar">
+        <input id="players-search" placeholder="Buscar Player por nome" value="${escapeHtml(uiState.playersSearch)}">
+        <select id="players-sector">
+          <option value="todos">Todos os setores</option>
+          ${sectors.map((sector) => `<option value="${escapeHtml(sector)}" ${sector === uiState.playersSector ? 'selected' : ''}>${escapeHtml(sector)}</option>`).join('')}
+        </select>
+      </div>
+
+      <div class="table-wrapper">
+        <table>
+          <thead>
+            <tr>
+              <th>Player</th>
+              <th>Cargo</th>
+              <th>Setor</th>
+              <th>Score</th>
+              <th>Metas</th>
+              <th>PDI</th>
+              <th>Abrir</th>
+            </tr>
+          </thead>
+          <tbody>
+            ${filteredPlayers.map((player) => `
+              <tr>
+                <td>
+                  <div class="player-name">${escapeHtml(player.name)}</div>
+                  <div class="table-subtitle">${escapeHtml(player.role)}</div>
+                </td>
+                <td>${escapeHtml(player.role)}</td>
+                <td>${escapeHtml(player.sector)}</td>
+                <td><span class="score-badge">Score ${player.score.toFixed(1)}</span></td>
+                <td><span class="status-tag ${getStatusClass(player.statusGoals)}">${escapeHtml(player.statusGoals)}</span></td>
+                <td><span class="status-tag ${getStatusClass(player.statusPdi)}">${escapeHtml(player.statusPdi)}</span></td>
+                <td><button class="table-row-button" data-player="${player.id}">Detalhar</button></td>
+              </tr>
+            `).join('')}
+          </tbody>
+        </table>
+      </div>
+    </section>
+  `;
+}
+
+function renderPlayerDetail() {
+  const player = getSelectedPlayer();
+  if (!player) {
+    pageContent.innerHTML = '<div class="empty-state">Nenhum Player selecionado.</div>';
+    return;
+  }
+
+  pageContent.innerHTML = `
+    <div class="player-summary">
+      <section class="detail-card">
+        <div class="player-header">
+          <div>
+            <div class="section-kicker">Player selecionado</div>
+            <div class="player-name">${escapeHtml(player.name)}</div>
+            <div class="table-subtitle">${escapeHtml(player.role)} · ${escapeHtml(player.sector)}</div>
+            <div class="status-row">
+              <span class="status-tag ${getStatusClass(player.statusGoals)}">Metas ${escapeHtml(player.statusGoals)}</span>
+              <span class="status-tag ${getStatusClass(player.statusPdi)}">PDI ${escapeHtml(player.statusPdi)}</span>
+            </div>
+          </div>
+          <div class="score-ring" style="--score:${player.score}">
+            <div class="score-ring-content">
+              <div class="score-value">${player.score.toFixed(1)}</div>
+              <div class="table-subtitle">Score</div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <div class="three-columns">
+        <section class="detail-card">
           <div class="panel-header">
             <div>
-              <div class="section-kicker">${escapeHtml(track.competency)}</div>
-              <h3>${escapeHtml(track.title)}</h3>
+              <div class="section-kicker">Soft skills</div>
+              <div class="section-title">Leitura atual</div>
             </div>
-            <button class="status-button" data-advance-track="${track.id}">Avancar 8%</button>
           </div>
-          <div class="progress-wrap">
-            <div class="progress-track"><div class="progress-bar" style="width:${track.progress}%"></div></div>
-            <div class="progress-labels">
-              <span>${track.progress}% do percurso</span>
-              <span>${track.modules.filter((module) => module.done).length} modulos finalizados</span>
+          <div class="skills-grid">
+            ${player.softSkills.map((skill) => `
+              <article class="skill-item">
+                <div class="skill-line">
+                  <span>${escapeHtml(skill.name)}</span>
+                  <span>${skill.score.toFixed(1)}</span>
+                </div>
+                <div class="skill-meta">Antes: ${skill.previous.toFixed(1)}</div>
+                <div class="skill-bar"><div class="skill-fill" style="width:${skill.score * 10}%"></div></div>
+              </article>
+            `).join('')}
+          </div>
+        </section>
+
+        <section class="detail-card">
+          <div class="panel-header">
+            <div>
+              <div class="section-kicker">Hard skills</div>
+              <div class="section-title">Leitura atual</div>
+            </div>
+          </div>
+          <div class="skills-grid">
+            ${player.hardSkills.map((skill) => `
+              <article class="skill-item">
+                <div class="skill-line">
+                  <span>${escapeHtml(skill.name)}</span>
+                  <span>${skill.score.toFixed(1)}</span>
+                </div>
+                <div class="skill-meta">Antes: ${skill.previous.toFixed(1)}</div>
+                <div class="skill-bar"><div class="skill-fill" style="width:${skill.score * 10}%"></div></div>
+              </article>
+            `).join('')}
+          </div>
+        </section>
+
+        <section class="detail-card">
+          <div class="panel-header">
+            <div>
+              <div class="section-kicker">Historico</div>
+              <div class="section-title">Evolucao do Score</div>
             </div>
           </div>
           <div class="stack">
-            ${track.modules.map((module) => `
-              <div class="habit-item">
+            ${player.history.map((item) => `
+              <article class="history-item">
                 <div class="split-line">
-                  <span>${escapeHtml(module.title)}</span>
-                  <strong>${module.done ? 'Feito' : 'Pendente'}</strong>
+                  <span>${escapeHtml(item.cycle)}</span>
+                  <strong>${item.score.toFixed(1)}</strong>
                 </div>
-              </div>
+                <div class="field-hint">Melhorou em: ${escapeHtml(item.improved.join(', '))}</div>
+                <div class="field-hint">Piorou em: ${escapeHtml(item.worsened.join(', '))}</div>
+              </article>
             `).join('')}
           </div>
-        </article>
-      `).join('')}
+        </section>
+      </div>
+
+      <div class="two-columns">
+        <section class="detail-card">
+          <div class="panel-header">
+            <div>
+              <div class="section-kicker">Metas</div>
+              <div class="section-title">Acompanhamento</div>
+            </div>
+          </div>
+          <div class="stack">
+            ${player.goals.map((goal) => `
+              <article class="goal-item">
+                <div class="item-top">
+                  <div>
+                    <div class="item-title">${escapeHtml(goal.title)}</div>
+                    <div class="item-subtitle">Prazo ${formatDate(goal.deadline)}</div>
+                  </div>
+                  <span class="status-tag ${getStatusClass(goal.status)}">${escapeHtml(goal.status)}</span>
+                </div>
+                <div class="item-description">Progresso ${goal.progress}% · Score da meta ${goal.scoreMeta.toFixed(1)}</div>
+                <div class="skill-bar"><div class="skill-fill" style="width:${goal.progress}%"></div></div>
+              </article>
+            `).join('')}
+          </div>
+        </section>
+
+        <section class="detail-card">
+          <div class="panel-header">
+            <div>
+              <div class="section-kicker">PDI</div>
+              <div class="section-title">Plano de desenvolvimento</div>
+            </div>
+          </div>
+          <div class="stack">
+            ${player.pdis.map((pdi) => `
+              <article class="pdi-item">
+                <div class="item-top">
+                  <div>
+                    <div class="item-title">${escapeHtml(pdi.title)}</div>
+                    <div class="item-subtitle">Prazo ${formatDate(pdi.deadline)}</div>
+                  </div>
+                  <span class="status-tag ${getStatusClass(pdi.status)}">${escapeHtml(pdi.status)}</span>
+                </div>
+                <div class="item-description">${escapeHtml(pdi.action)}</div>
+              </article>
+            `).join('')}
+          </div>
+        </section>
+      </div>
     </div>
   `;
 }
 
-function renderAssessments() {
+function renderNinebox() {
+  const orderedKeys = ['3-1', '3-2', '3-3', '2-1', '2-2', '2-3', '1-1', '1-2', '1-3'];
+  const cells = orderedKeys.map((key) => {
+    const [performance, potential] = key.split('-').map(Number);
+    const players = appState.players.filter(
+      (player) => player.performance === performance && player.potential === potential
+    );
+    return {
+      key,
+      players,
+      ...nineBoxDescriptions[key],
+    };
+  });
+
   pageContent.innerHTML = `
-    <div class="grid-2">
-      <section class="list-card">
-        <div class="panel-header">
-          <div>
-            <div class="section-kicker">Radar simplificado</div>
-            <h3>Competencias atuais</h3>
-          </div>
-          <span class="tag">Escala de 1 a 5</span>
+    <section class="matrix-card">
+      <div class="panel-header">
+        <div>
+          <div class="section-kicker">Matriz 3x3</div>
+          <div class="section-title">Ninebox</div>
         </div>
-        <div class="stack">
-          ${appState.competencies.map((competency) => `
-            <article class="competency-item">
+      </div>
+
+      <div class="matrix-grid">
+        ${cells.map((cell) => `
+          <article class="cell-box">
+            <div class="matrix-label">${escapeHtml(cell.key)}</div>
+            <strong>${escapeHtml(cell.title)}</strong>
+            <div class="cell-description">${escapeHtml(cell.description)}</div>
+            <div class="cell-player-list">
+              ${cell.players.map((player) => `
+                <button class="player-chip" data-player="${player.id}">
+                  ${escapeHtml(player.name)} · ${player.score.toFixed(1)}
+                </button>
+              `).join('') || '<span class="empty-state">Sem Players</span>'}
+            </div>
+          </article>
+        `).join('')}
+      </div>
+    </section>
+  `;
+}
+
+function renderReports() {
+  pageContent.innerHTML = `
+    <section class="report-card">
+      <div class="panel-header">
+        <div>
+          <div class="section-kicker">Comparativo</div>
+          <div class="section-title">Historico dos Players</div>
+        </div>
+      </div>
+      <div class="report-grid">
+        ${appState.players.map((player) => {
+          const last = player.history[player.history.length - 1];
+          const previous = player.history[player.history.length - 2] || last;
+          const delta = last.score - previous.score;
+          return `
+            <article class="history-item">
               <div class="item-top">
-                <div class="item-title">${escapeHtml(competency.name)}</div>
-                <div class="tag">Meta ${competency.target}/5</div>
-              </div>
-              <div class="kpi-line">
-                <span>Nivel atual</span>
-                <div class="kpi-scale">${competencyDots(competency.current)}</div>
-              </div>
-              <div class="form-grid">
-                <div class="form-row">
-                  <label for="current-${competency.id}">Nivel atual</label>
-                  <select id="current-${competency.id}" data-competency="${competency.id}" data-field="current">
-                    ${[1, 2, 3, 4, 5].map((value) => `<option value="${value}" ${value === competency.current ? 'selected' : ''}>${value}</option>`).join('')}
-                  </select>
+                <div>
+                  <div class="player-name">${escapeHtml(player.name)}</div>
+                  <div class="table-subtitle">${escapeHtml(player.role)} · ${escapeHtml(player.sector)}</div>
                 </div>
-                <div class="form-row">
-                  <label for="target-${competency.id}">Nivel desejado</label>
-                  <select id="target-${competency.id}" data-competency="${competency.id}" data-field="target">
-                    ${[1, 2, 3, 4, 5].map((value) => `<option value="${value}" ${value === competency.target ? 'selected' : ''}>${value}</option>`).join('')}
-                  </select>
-                </div>
+                <span class="score-badge">Score ${last.score.toFixed(1)}</span>
+              </div>
+              <div class="body-copy">
+                ${delta >= 0
+                  ? `<span class="delta-good">Melhorou ${delta.toFixed(1)} ponto(s)</span>`
+                  : `<span class="delta-bad">Piorou ${Math.abs(delta).toFixed(1)} ponto(s)</span>`}
+              </div>
+              <div class="field-hint">Ultimo ciclo: ${escapeHtml(last.cycle)}</div>
+              <div class="field-hint">Melhorou em: ${escapeHtml(last.improved.join(', '))}</div>
+              <div class="field-hint">Piorou em: ${escapeHtml(last.worsened.join(', '))}</div>
+              <div class="score-row">
+                <button class="table-row-button" data-player="${player.id}">Abrir Player</button>
               </div>
             </article>
+          `;
+        }).join('')}
+      </div>
+    </section>
+  `;
+}
+
+function renderAcademy() {
+  const player = getSelectedPlayer();
+  const trailId = uiState.academyTrailId || (player ? player.academy.recommendedTrailId : appState.academy.trails[0].id);
+  const selectedTrail = appState.academy.trails.find((trail) => trail.id === trailId) || appState.academy.trails[0];
+  uiState.academyTrailId = selectedTrail.id;
+  uiState.showFlashcardAnswer = false;
+
+  pageContent.innerHTML = `
+    <div class="academy-layout">
+      <section class="academy-card">
+        <div class="panel-header">
+          <div>
+            <div class="section-kicker">Trilhas</div>
+            <div class="section-title">Academy</div>
+          </div>
+        </div>
+        <div class="trail-list">
+          ${appState.academy.trails.map((trail) => `
+            <button class="player-chip ${trail.id === selectedTrail.id ? 'active' : ''}" data-trail="${trail.id}">
+              <strong>${escapeHtml(trail.title)}</strong><br>
+              <span class="table-subtitle">${escapeHtml(trail.competency)} · ${escapeHtml(trail.level)}</span>
+            </button>
           `).join('')}
         </div>
       </section>
 
-      <section class="form-card">
-        <div class="section-kicker">Como ler</div>
-        <h3>Interpretacao rapida</h3>
-        <div class="stack">
-          ${appState.competencies
-            .slice()
-            .sort((a, b) => (b.target - b.current) - (a.target - a.current))
-            .map((competency) => `
-              <article class="habit-item">
-                <div class="split-line">
-                  <span>${escapeHtml(competency.name)}</span>
-                  <strong>Gap de ${competency.target - competency.current}</strong>
-                </div>
-                <div class="item-description">
-                  ${competency.target === competency.current
-                    ? 'Competencia em alinhamento com a meta desejada.'
-                    : 'Existe espaco claro para desenvolvimento intencional nesta competencia.'}
-                </div>
-              </article>
-            `).join('')}
-        </div>
-      </section>
-    </div>
-  `;
-}
-
-function renderFeedbacks() {
-  pageContent.innerHTML = `
-    <div class="grid-2">
-      <section class="list-card">
+      <section class="academy-card">
         <div class="panel-header">
           <div>
-            <div class="section-kicker">Historico</div>
-            <h3>Feedbacks registrados</h3>
+            <div class="section-kicker">Conteudo recomendado</div>
+            <div class="section-title">${escapeHtml(selectedTrail.title)}</div>
           </div>
-          <span class="tag">${appState.feedbacks.length} registros</span>
+          ${player ? `<span class="pill">Player foco: ${escapeHtml(player.name)}</span>` : ''}
         </div>
+
         <div class="stack">
-          ${appState.feedbacks.length ? appState.feedbacks.map((feedback) => `
-            <article class="feedback-item">
-              <div class="feedback-type">${escapeHtml(feedback.type)}</div>
-              <div class="item-top">
-                <div>
-                  <div class="item-title">${escapeHtml(feedback.author)}</div>
-                  <div class="item-subtitle">${escapeHtml(feedback.context)}</div>
+          <article class="academy-scenario">
+            <div class="matrix-label">Situacao pratica</div>
+            <div class="item-description">${escapeHtml(selectedTrail.scenario)}</div>
+          </article>
+
+          <article class="academy-book">
+            <div class="matrix-label">Saber em Pilulas</div>
+            <div class="item-title">${escapeHtml(selectedTrail.saber.titleBook)}</div>
+            <div class="item-description">${escapeHtml(selectedTrail.saber.summary)}</div>
+            <div class="field-hint">Como aplicar hoje: ${escapeHtml(selectedTrail.saber.application)}</div>
+          </article>
+
+          ${selectedTrail.flashcards.map((flashcard, index) => `
+            <article class="flashcard ${uiState.showFlashcardAnswer && index === 0 ? 'show-answer' : ''}">
+              <div class="matrix-label">Quiz em flashcard ${index + 1}</div>
+              <div class="flashcard-question">${escapeHtml(flashcard.question)}</div>
+              <div class="flashcard-answer">${escapeHtml(flashcard.answer)}</div>
+              ${index === 0 ? `
+                <div class="flashcard-actions">
+                  <button class="flashcard-button" data-flashcard="toggle">
+                    ${uiState.showFlashcardAnswer ? 'Ocultar resposta' : 'Mostrar resposta'}
+                  </button>
                 </div>
-                <div class="tag">${new Date(feedback.createdAt).toLocaleDateString('pt-BR')}</div>
-              </div>
-              <div class="body-copy">${escapeHtml(feedback.message)}</div>
-              <div class="field-hint">Proxima acao: ${escapeHtml(feedback.nextStep)}</div>
+              ` : ''}
             </article>
-          `).join('') : '<div class="empty-state">Nenhum feedback registrado ainda.</div>'}
+          `).join('')}
         </div>
-      </section>
-
-      <section class="form-card">
-        <div class="section-kicker">Novo registro</div>
-        <h3>Adicionar feedback estruturado</h3>
-        <form id="feedback-form" class="form-grid">
-          <div class="form-row">
-            <label for="feedback-author">Autor</label>
-            <input id="feedback-author" name="author" placeholder="Ex.: Gestor direto" required>
-          </div>
-          <div class="form-row">
-            <label for="feedback-type">Tipo</label>
-            <select id="feedback-type" name="type">
-              <option>Fortaleca</option>
-              <option>Desenvolva</option>
-            </select>
-          </div>
-          <div class="form-row full">
-            <label for="feedback-context">Contexto</label>
-            <input id="feedback-context" name="context" placeholder="Ex.: Reuniao 1:1 mensal" required>
-          </div>
-          <div class="form-row full">
-            <label for="feedback-message">Comportamento e impacto</label>
-            <textarea id="feedback-message" name="message" placeholder="O que aconteceu e qual impacto gerou?" required></textarea>
-          </div>
-          <div class="form-row full">
-            <label for="feedback-next">Proxima acao</label>
-            <textarea id="feedback-next" name="nextStep" placeholder="Qual o proximo experimento ou ajuste?"></textarea>
-          </div>
-          <div class="form-row full">
-            <button class="primary-button" type="submit">Salvar feedback</button>
-          </div>
-        </form>
-      </section>
-    </div>
-  `;
-}
-
-function renderActionPlan() {
-  pageContent.innerHTML = `
-    <div class="grid-2">
-      <section class="list-card">
-        <div class="panel-header">
-          <div>
-            <div class="section-kicker">PDI</div>
-            <h3>Itens do plano de acao</h3>
-          </div>
-        </div>
-        <div class="stack">
-          ${appState.actionPlan.length ? appState.actionPlan.map((item) => `
-            <article class="action-item">
-              <div class="action-status">${escapeHtml(item.status)}</div>
-              <div class="item-top">
-                <div>
-                  <div class="item-title">${escapeHtml(item.competency)}</div>
-                  <div class="item-description">${escapeHtml(item.action)}</div>
-                </div>
-                <button class="status-button" data-action-status="${item.id}">Atualizar status</button>
-              </div>
-              <div class="action-meta">
-                <span class="tag">Prazo ${formatDate(item.deadline)}</span>
-              </div>
-            </article>
-          `).join('') : '<div class="empty-state">Seu plano ainda esta vazio.</div>'}
-        </div>
-      </section>
-
-      <section class="form-card">
-        <div class="section-kicker">Nova acao</div>
-        <h3>Criar item de desenvolvimento</h3>
-        <form id="action-form" class="form-grid">
-          <div class="form-row">
-            <label for="action-competency">Competencia</label>
-            <input id="action-competency" name="competency" placeholder="Ex.: Delegacao" required>
-          </div>
-          <div class="form-row">
-            <label for="action-deadline">Prazo</label>
-            <input id="action-deadline" type="date" name="deadline" required>
-          </div>
-          <div class="form-row full">
-            <label for="action-text">Acao</label>
-            <textarea id="action-text" name="action" placeholder="Descreva a pratica concreta que voce vai executar." required></textarea>
-          </div>
-          <div class="form-row full">
-            <button class="primary-button" type="submit">Adicionar ao plano</button>
-          </div>
-        </form>
-      </section>
-    </div>
-  `;
-}
-
-function renderProfile() {
-  pageContent.innerHTML = `
-    <div class="grid-2">
-      <section class="list-card">
-        <div class="section-kicker">Panorama</div>
-        <h3>Identidade do lider</h3>
-        <div class="profile-grid">
-          <article class="profile-line">
-            <span>Nome</span>
-            <strong>${escapeHtml(appState.profile.name)}</strong>
-          </article>
-          <article class="profile-line">
-            <span>Papel</span>
-            <strong>${escapeHtml(appState.profile.role)}</strong>
-          </article>
-          <article class="profile-line">
-            <span>Empresa</span>
-            <strong>${escapeHtml(appState.profile.company)}</strong>
-          </article>
-          <article class="profile-line">
-            <span>Nivel atual</span>
-            <strong>${escapeHtml(appState.profile.level)}</strong>
-          </article>
-        </div>
-        <div class="reflection-card">
-          <h3>Objetivo principal</h3>
-          <p class="body-copy">${escapeHtml(appState.profile.objective)}</p>
-        </div>
-      </section>
-
-      <section class="form-card">
-        <div class="section-kicker">Ajustes</div>
-        <h3>Atualizar direcionadores</h3>
-        <form id="profile-form" class="form-grid">
-          <div class="form-row">
-            <label for="profile-level">Nivel atual</label>
-            <input id="profile-level" name="level" value="${escapeHtml(appState.profile.level)}" required>
-          </div>
-          <div class="form-row">
-            <label for="profile-next">Proxima mentoria</label>
-            <input id="profile-next" name="nextMentoring" value="${escapeHtml(appState.profile.nextMentoring)}" required>
-          </div>
-          <div class="form-row full">
-            <label for="profile-objective">Objetivo principal</label>
-            <textarea id="profile-objective" name="objective" required>${escapeHtml(appState.profile.objective)}</textarea>
-          </div>
-          <div class="form-row full">
-            <label for="profile-intention">Intencao da semana</label>
-            <textarea id="profile-intention" name="weeklyIntention" required>${escapeHtml(appState.profile.weeklyIntention)}</textarea>
-          </div>
-          <div class="form-row full">
-            <button class="primary-button" type="submit">Salvar perfil</button>
-          </div>
-        </form>
       </section>
     </div>
   `;
 }
 
 function renderView() {
-  const copy = copyByView[view];
+  const copy = copyByView[uiState.view];
   pageTitle.textContent = copy.title;
-  navLinks.forEach((link) => link.classList.toggle('active', link.dataset.view === view));
+  navLinks.forEach((link) => link.classList.toggle('active', link.dataset.view === uiState.view));
   renderHero();
 
-  switch (view) {
-    case 'trilhas':
-      renderTracks();
-      break;
-    case 'avaliacoes':
-      renderAssessments();
-      break;
-    case 'feedbacks':
-      renderFeedbacks();
-      break;
-    case 'plano':
-      renderActionPlan();
-      break;
-    case 'perfil':
-      renderProfile();
-      break;
-    default:
-      renderDashboard();
+  if (uiState.view === 'players') {
+    renderPlayers();
+    return;
   }
+  if (uiState.view === 'player') {
+    renderPlayerDetail();
+    return;
+  }
+  if (uiState.view === 'ninebox') {
+    renderNinebox();
+    return;
+  }
+  if (uiState.view === 'relatorios') {
+    renderReports();
+    return;
+  }
+  if (uiState.view === 'academy') {
+    renderAcademy();
+    return;
+  }
+
+  renderDashboard();
 }
 
-function cycleActionStatus(current) {
-  const statuses = ['pendente', 'em andamento', 'concluido'];
-  const index = statuses.indexOf(current);
-  return statuses[(index + 1) % statuses.length];
+function openPlayer(playerId) {
+  uiState.selectedPlayerId = playerId;
+  uiState.view = 'player';
+  renderView();
 }
 
 function bindEvents() {
   navLinks.forEach((link) => {
     link.addEventListener('click', () => {
-      view = link.dataset.view;
+      uiState.view = link.dataset.view;
       renderView();
     });
   });
 
-  pageContent.addEventListener('click', async (event) => {
-    const habitId = event.target.getAttribute('data-toggle-habit');
-    const trackId = event.target.getAttribute('data-advance-track');
-    const actionId = event.target.getAttribute('data-action-status');
+  pageContent.addEventListener('click', (event) => {
+    const playerId = event.target.getAttribute('data-player');
+    const trailId = event.target.getAttribute('data-trail');
+    const flashcardAction = event.target.getAttribute('data-flashcard');
 
-    if (habitId) {
-      const habit = appState.habits.find((item) => item.id === habitId);
-      if (habit) {
-        habit.completedToday = !habit.completedToday;
-        renderView();
-        await persistState('Habito atualizado');
-      }
+    if (playerId) {
+      openPlayer(playerId);
       return;
     }
 
-    if (trackId) {
-      const track = appState.tracks.find((item) => item.id === trackId);
-      if (track) {
-        track.progress = Math.min(track.progress + 8, 100);
-        const pendingModule = track.modules.find((module) => !module.done);
-        if (pendingModule) {
-          pendingModule.done = true;
-        }
-        renderView();
-        await persistState('Trilha atualizada');
-      }
+    if (trailId) {
+      uiState.academyTrailId = trailId;
+      renderView();
       return;
     }
 
-    if (actionId) {
-      const action = appState.actionPlan.find((item) => item.id === actionId);
-      if (action) {
-        action.status = cycleActionStatus(action.status);
-        renderView();
-        await persistState('Plano atualizado');
-      }
+    if (flashcardAction === 'toggle') {
+      uiState.showFlashcardAnswer = !uiState.showFlashcardAnswer;
+      renderView();
     }
   });
 
-  pageContent.addEventListener('change', async (event) => {
-    const competencyId = event.target.getAttribute('data-competency');
-    const field = event.target.getAttribute('data-field');
-    if (!competencyId || !field) {
-      return;
-    }
-
-    const competency = appState.competencies.find((item) => item.id === competencyId);
-    if (competency) {
-      competency[field] = Number(event.target.value);
-      renderView();
-      await persistState('Competencias atualizadas');
+  pageContent.addEventListener('input', (event) => {
+    if (event.target.id === 'players-search') {
+      uiState.playersSearch = event.target.value;
+      renderPlayers();
     }
   });
 
-  pageContent.addEventListener('submit', async (event) => {
-    event.preventDefault();
-
-    if (event.target.id === 'feedback-form') {
-      const formData = new FormData(event.target);
-      appState.feedbacks.unshift({
-        id: createId(),
-        author: formData.get('author'),
-        type: formData.get('type'),
-        context: formData.get('context'),
-        message: formData.get('message'),
-        nextStep: formData.get('nextStep') || 'Sem proxima acao registrada.',
-        createdAt: new Date().toISOString(),
-      });
-      renderView();
-      await persistState('Feedback salvo');
-      return;
-    }
-
-    if (event.target.id === 'action-form') {
-      const formData = new FormData(event.target);
-      appState.actionPlan.unshift({
-        id: createId(),
-        competency: formData.get('competency'),
-        action: formData.get('action'),
-        deadline: formData.get('deadline'),
-        status: 'pendente',
-      });
-      renderView();
-      await persistState('Plano salvo');
-      return;
-    }
-
-    if (event.target.id === 'profile-form') {
-      const formData = new FormData(event.target);
-      appState.profile.level = formData.get('level');
-      appState.profile.nextMentoring = formData.get('nextMentoring');
-      appState.profile.objective = formData.get('objective');
-      appState.profile.weeklyIntention = formData.get('weeklyIntention');
-      renderView();
-      await persistState('Perfil salvo');
+  pageContent.addEventListener('change', (event) => {
+    if (event.target.id === 'players-sector') {
+      uiState.playersSector = event.target.value;
+      renderPlayers();
     }
   });
 
@@ -881,18 +1098,27 @@ function bindEvents() {
     window.location.href = 'login.html';
   });
 
-  saveButton.addEventListener('click', async () => {
-    await persistState('Salvando...');
+  refreshButton.addEventListener('click', async () => {
+    setStatus('Atualizando dados...');
+    appState = await loadState();
+    if (!uiState.selectedPlayerId && appState.players.length) {
+      uiState.selectedPlayerId = appState.players[0].id;
+    }
+    renderView();
+    setStatus(skipAuth ? 'Modo demonstracao ativo' : 'Dados sincronizados');
   });
 }
 
 async function init() {
   renderUserSummary();
-  setSaveState('Carregando...');
+  setStatus('Carregando dados...');
   appState = await loadState();
+  if (appState.players.length) {
+    uiState.selectedPlayerId = appState.players[0].id;
+  }
   bindEvents();
   renderView();
-  setSaveState(skipAuth ? 'Salvo localmente' : 'Sincronizado');
+  setStatus(skipAuth ? 'Modo demonstracao ativo' : 'Dados sincronizados');
 }
 
 init();

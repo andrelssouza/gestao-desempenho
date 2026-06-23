@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Atlas Lideranca</title>
+  <title>Atlas Performance</title>
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@500;600;700&family=Manrope:wght@400;500;600;700;800&display=swap" rel="stylesheet">
@@ -13,18 +13,18 @@
   <div class="app-shell">
     <aside class="sidebar">
       <div class="brand-block">
-        <div class="brand-kicker">Atlas</div>
-        <h1>Desenvolva lideres com ritmo, clareza e acao.</h1>
-        <p>Um cockpit de evolucao para quem lidera pessoas de verdade.</p>
+        <div class="brand-kicker">Atlas Performance</div>
+        <h1>Gestao de performance com leitura clara, risco visivel e acao pratica.</h1>
+        <p>Uma plataforma para gestores acompanharem Players, Score, ninebox, historico e desenvolvimento.</p>
       </div>
 
       <nav class="sidebar-nav" aria-label="Principal">
-        <button class="nav-link active" data-view="dashboard">Painel</button>
-        <button class="nav-link" data-view="trilhas">Trilhas</button>
-        <button class="nav-link" data-view="avaliacoes">Avaliacoes</button>
-        <button class="nav-link" data-view="feedbacks">Feedbacks</button>
-        <button class="nav-link" data-view="plano">Plano de acao</button>
-        <button class="nav-link" data-view="perfil">Perfil</button>
+        <button class="nav-link active" data-view="dashboard">Dashboard</button>
+        <button class="nav-link" data-view="players">Players</button>
+        <button class="nav-link" data-view="player">Player</button>
+        <button class="nav-link" data-view="ninebox">Ninebox</button>
+        <button class="nav-link" data-view="relatorios">Relatorios</button>
+        <button class="nav-link" data-view="academy">Academy</button>
       </nav>
 
       <div class="sidebar-footer">
@@ -37,13 +37,13 @@
     <main class="content">
       <header class="topbar">
         <div>
-          <div class="eyebrow">MVP de desenvolvimento de lideres</div>
-          <h2 id="page-title">Painel</h2>
+          <div class="eyebrow">Sistema operacional de gestao</div>
+          <h2 id="page-title">Dashboard</h2>
         </div>
 
         <div class="topbar-actions">
-          <button id="save-btn" class="secondary-button">Salvar agora</button>
-          <div id="save-indicator" class="save-indicator">Sincronizado</div>
+          <button id="refresh-btn" class="secondary-button">Atualizar visao</button>
+          <div id="save-indicator" class="save-indicator">Dados sincronizados</div>
         </div>
       </header>
 
@@ -51,14 +51,6 @@
       <section id="page-content" class="page-content"></section>
     </main>
   </div>
-
-  <template id="metric-card-template">
-    <article class="metric-card">
-      <div class="metric-label"></div>
-      <div class="metric-value"></div>
-      <div class="metric-note"></div>
-    </article>
-  </template>
 
   <script src="./lideranca.js"></script>
 </body>
